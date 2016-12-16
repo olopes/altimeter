@@ -3,6 +3,8 @@ package org.psicover.altimeter;
 public class AltimeterSample {
 	private byte temperature;
 	private int pressure;
+	private boolean altitudeCalc=false;
+	private double altitude;
 
 	public AltimeterSample() {
 	}
@@ -15,6 +17,7 @@ public class AltimeterSample {
 		this.pressure = (pressh&0xff);
 		this.pressure = (this.pressure << 8)|(pressm&0xff);
 		this.pressure = (this.pressure << 8)|(pressl&0xff);
+		getAltitude();
 	}
 
 	public byte getTemperature() {
@@ -31,6 +34,13 @@ public class AltimeterSample {
 
 	public void setPressure(int pressure) {
 		this.pressure = pressure;
+	}
+	
+	public double getAltitude() {
+		if(!altitudeCalc) {
+			altitude = Physics.wikipediaAltitude(getPressure(), getTemperature());
+		}
+		return altitude;
 	}
 
 	@Override
