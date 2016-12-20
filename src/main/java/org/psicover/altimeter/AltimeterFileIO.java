@@ -56,21 +56,27 @@ public class AltimeterFileIO {
 			boolean preamble = true;
 			byte [] sampleData = new byte[4];
 			List<AltimeterSample> samples = new ArrayList<>();
+			AltimeterSession session = null;
 			while((r = in.read(sampleData))>0) {
 				if(sampleData[0] == -1 && sampleData[1] == -1 && sampleData[2] == -1 && sampleData[3] == -1) {
 					preamble = true;
 				} else if(preamble) {
+					if(null != session) {
+						session.setData(samples.toArray(new AltimeterSample[samples.size()]));
+					}
 					SampleRate rate = SampleRate.findRate(sampleData[3]);
 					System.out.println("New session found. Sample rate: "+rate);
 					preamble = false;
 					samples = new ArrayList<>();
-					AltimeterSession session = new AltimeterSession();
-					session.setData(samples);
+					session = new AltimeterSession();
 					session.setRate(rate);
 					result.add(session);
 				} else {
 					samples.add(new AltimeterSample(sampleData));
 				}
+			}
+			if(null != session) {
+				session.setData(samples.toArray(new AltimeterSample[samples.size()]));
 			}
 		} catch(IOException e) {
 			e.printStackTrace();
@@ -85,10 +91,10 @@ public class AltimeterFileIO {
 		List<AltimeterSession> sessions = readFile(new File("session20161211.fda"));
 		for(AltimeterSession session : sessions) {
 			int sr = session.getRate().samplesPerSecond();
-			List<AltimeterSample> data = session.getData();
+			AltimeterSample[] data = session.getData();
 			System.out.println();
 			System.out.println("********************************");
-			System.out.println("Session start: "+data.size()+" samples at "+sr+" samples per second");
+			System.out.println("Session start: "+data.length+" samples at "+sr+" samples per second");
 			double minA=Double.POSITIVE_INFINITY, maxA=Double.NEGATIVE_INFINITY, meanA=0;
 			double minT=Double.POSITIVE_INFINITY, maxT=Double.NEGATIVE_INFINITY, meanT=0;
 			int i = 0;

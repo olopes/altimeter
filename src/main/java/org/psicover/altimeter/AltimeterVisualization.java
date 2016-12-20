@@ -10,10 +10,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,11 +22,16 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
@@ -38,18 +41,10 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.odftoolkit.simple.SpreadsheetDocument;
+import org.odftoolkit.simple.table.Table;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.streaming.SXSSFSheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 
 public class AltimeterVisualization extends JFrame {
@@ -186,19 +181,21 @@ public class AltimeterVisualization extends JFrame {
 			lastDirectory = jfc.getCurrentDirectory();
 			// TODO add extension if necessary
 	        SXSSFWorkbook wb = new SXSSFWorkbook(100); // keep 100 rows in memory, exceeding rows will be flushed to disk
-	        wb.setCompressTempFiles(true); // temp files will be gzipped
+	        // wb.setCompressTempFiles(true); // temp files will be gzipped
 			try (FileOutputStream fout = new FileOutputStream(jfc.getSelectedFile())){
 				CellStyle csTime = wb.createCellStyle();
-				csTime.setDataFormat((short)0x15); // "hh:mm:ss"
+				DataFormat dfTime = wb.createDataFormat();
+				csTime.setDataFormat(dfTime.getFormat("#,##0.000"));
 				CellStyle csInt = wb.createCellStyle();
 				csInt.setDataFormat((short)3); // "#,##0"
 				CellStyle csAlt = wb.createCellStyle();
 				csAlt.setDataFormat((short)4); // "#,##0.00"
 				
 				for(int tab = 0; tab < pane.getTabCount(); tab++) {
-					ChartPanel panel = (ChartPanel)pane.getTabComponentAt(tab);
+					ChartPanel panel = (ChartPanel)pane.getComponentAt(tab);//TabComponentAt(tab);
 					if(panel == null) continue;
-					String title = pane.getTitleAt(tab);
+					// String title = pane.getTitleAt(tab); 
+					String title = String.format("Session %d", tab+1);
 					AltimeterSession session = (AltimeterSession) panel.getClientProperty("raw session");
 					Row r;
 					Cell c;
@@ -212,13 +209,13 @@ public class AltimeterVisualization extends JFrame {
 					c = r.createCell(1); c.setCellValue("PRESSURE");
 					c = r.createCell(2); c.setCellValue("TEMPERATURE");
 					c = r.createCell(3); c.setCellValue("ALTITUDE");
-					long tuIncr = 1000/session.getRate().samplesPerSecond(); // millis per sample
+					double tuIncr = 1.0/session.getRate().samplesPerSecond(); // millis per sample
 
-					long time = 0;
+					double time = 0;
 					int ri = 1;
 					for(AltimeterSample sample : session.getData()) {
 						r = sheet.createRow(ri);
-						c = r.createCell(0); c.setCellValue(DateUtil.getExcelDate(new Date(time)));
+						c = r.createCell(0); c.setCellValue(time);
 						c = r.createCell(1); c.setCellValue(sample.getPressure());
 						c = r.createCell(2); c.setCellValue(sample.getTemperature());
 						c = r.createCell(3); c.setCellValue(sample.getAltitude());
@@ -232,11 +229,40 @@ public class AltimeterVisualization extends JFrame {
 				// TODO display error message
 				e.printStackTrace();
 			} finally {
-				wb.dispose();
+				// wb.dispose();
+				try {
+					wb.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 	}
 
+	private void doExportODS() {
+		JFileChooser jfc = new JFileChooser(lastDirectory);
+		jfc.addChoosableFileFilter(new FileNameExtensionFilter("ODF Spreadsheet (*.ods)", "ods"));
+		if(jfc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			lastDirectory = jfc.getCurrentDirectory();
+			// TODO add extension if necessary
+			SpreadsheetDocument outOds = null;
+			try {
+				outOds = SpreadsheetDocument.newSpreadsheetDocument();
+				Table sheet = outOds.appendSheet("Sheet _i_");
+				org.odftoolkit.simple.table.Cell cell = null;
+				int colIndex = 0;
+				int rowIndex = 0;
+				cell = sheet.getCellByPosition(colIndex, rowIndex);
+				cell.setDoubleValue(123.456);
+				
+				outOds.save(jfc.getSelectedFile());
+			} catch(Exception e) {
+				// TODO display error
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
 	private void doExportPNG() {
 		ChartPanel panel = (ChartPanel)pane.getSelectedComponent();
 		if(panel == null) return;
@@ -299,7 +325,8 @@ public class AltimeterVisualization extends JFrame {
 		int i = 0;
 		for(AltimeterSession session : sessions) {
 			i++;
-			int nsamples = session.getData().size();
+			AltimeterSample [] samples = session.getData();
+			int nsamples = samples.length;
 			SampleRate rate = session.getRate();
 			int duration = rate.duration(nsamples);
 			double tuIncr = 1.0/rate.samplesPerSecond();
@@ -307,23 +334,54 @@ public class AltimeterVisualization extends JFrame {
 			int durm = duration%3600;
 			int minutes = durm/60;
 			int seconds = durm%60;
-			String title = String.format("Session %d: %02d:%02d:%02d", i, hours, minutes, seconds);
+			String title = String.format("Session %d - %02d:%02d:%02d", i, hours, minutes, seconds);
 			
 			// TODO adjust ticks, scales, zoom, etc...
 			XYSeriesCollection dataset = new XYSeriesCollection();
 			XYSeriesCollection tempDataSet = new XYSeriesCollection();
 			XYSeries altSeries = new XYSeries("Altitude (m)");
+			XYSeries altSSeries = new XYSeries("Smoothed Altitude (m)");
 			XYSeries tempSeries = new XYSeries("Temperature (C)");
+			XYSeries tempSSeries = new XYSeries("Smoothed Temperature (C)");
 			
 			double x = 0;
-			for(AltimeterSample sample : session.getData()) {
-				altSeries.add(x, sample.getAltitude());
-				tempSeries.add(x, sample.getTemperature());
+			double [] smoothAlt = new double[samples.length];
+			double [] smoothTem = new double[samples.length];
+			for(int j = 0; j < samples.length; j++) {
+				AltimeterSample sample = samples[j];
+				double alt = sample.getAltitude();
+				double tem = sample.getTemperature();
+				
+				// smooth curve
+				int cnt = 1;
+				double sumAlt = alt;
+				double sumTem = tem;
+				if(j > 0) {
+					cnt++;
+					sumAlt += smoothAlt[j-1];
+					sumTem += smoothTem[j-1];
+				} 
+				if (j+1 < samples.length) {
+					cnt++;
+					AltimeterSample next = samples[j+1];
+					sumAlt += next.getAltitude();
+					sumTem += next.getTemperature();
+				}
+				
+				smoothAlt[j] = sumAlt/cnt;
+				smoothTem[j] = sumTem/cnt;
+				
+				altSeries.add(x, alt);
+				altSSeries.add(x, smoothAlt[j]);
+				tempSeries.add(x, tem);
+				tempSSeries.add(x, smoothTem[j]);
 				x+=tuIncr;
 			}
 			
 			dataset.addSeries(altSeries);
+			dataset.addSeries(altSSeries);
 			tempDataSet.addSeries(tempSeries);
+			tempDataSet.addSeries(tempSSeries);
 			
 			JFreeChart chart = ChartFactory.createXYLineChart(title,
 		            "Time", "Altitude", dataset);

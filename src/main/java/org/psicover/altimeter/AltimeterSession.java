@@ -1,20 +1,18 @@
 package org.psicover.altimeter;
 
-import java.util.List;
-
 public class AltimeterSession {
 
-	private List<AltimeterSample> data;
+	private AltimeterSample[] data;
 	private SampleRate rate;
 
 	public AltimeterSession() {
 	}
 
-	public List<AltimeterSample> getData() {
+	public AltimeterSample[] getData() {
 		return data;
 	}
 
-	public void setData(List<AltimeterSample> data) {
+	public void setData(AltimeterSample[] data) {
 		this.data = data;
 	}
 
