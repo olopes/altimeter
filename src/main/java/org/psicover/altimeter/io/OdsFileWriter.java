@@ -15,8 +15,7 @@ import org.psicover.altimeter.ui.AltimeterIOException;
 
 public class OdsFileWriter {
 
-	// FIXME it has a lot of performance issues. Maybe a streaming solution like
-	// Xlsx?
+	// FIXME it has a lot of performance issues. Maybe a streaming solution like SXSSF
 
 	private static class AltimeterTableModel extends AbstractTableModel {
 		private static final long serialVersionUID = 1L;
@@ -98,46 +97,6 @@ public class OdsFileWriter {
 		} catch (IOException e) {
 			throw new AltimeterIOException(e);
 		}
-
-		
-//		SpreadsheetDocument outOds = null;
-//		try {
-//			outOds = SpreadsheetDocument.newSpreadsheetDocument();
-//			AltimeterSession[] sessions = data.getSessions();
-//
-//			for(int tab = 0; tab < sessions.length; tab++) {
-//				// String title = pane.getTitleAt(tab); 
-//				String title = String.format("Session %d", tab+1);
-//				AltimeterSession session = sessions[tab];
-//				Table sheet = outOds.appendSheet(title);
-//				sheet.appendColumns(4);
-//				sheet.appendRows(session.getData().length+1);
-//				Cell c = null;
-//				c = sheet.getCellByPosition(0, 0); c.setStringValue("TIME");
-//				c = sheet.getCellByPosition(1, 0); c.setStringValue("PRESSURE");
-//				c = sheet.getCellByPosition(2, 0); c.setStringValue("TEMPERATURE");
-//				c = sheet.getCellByPosition(3, 0); c.setStringValue("ALTITUDE");
-//				double tuIncr = 1.0/session.getRate().samplesPerSecond(); // millis per sample
-//
-//				double time = 0;
-//				int ri = 1;
-//				for(AltimeterSample sample : session.getData()) {
-//					c = sheet.getCellByPosition(0, ri); c.setDoubleValue(Double.valueOf(time));
-//					c = sheet.getCellByPosition(1, ri); c.setDoubleValue(Double.valueOf(sample.getPressure()));
-//					c = sheet.getCellByPosition(2, ri); c.setDoubleValue(Double.valueOf(sample.getTemperature()));
-//					c = sheet.getCellByPosition(3, ri); c.setDoubleValue(Double.valueOf(sample.getAltitude()));
-//					ri++;
-//					time += tuIncr;
-//				}
-//			}
-//			
-//			outOds.removeSheet(0); // remove the default (first) sheet
-//			outOds.save(outputFile);
-//			System.out.println("ods done");
-//		} catch (Exception e) {
-//			throw new AltimeterIOException(e);
-//		}
-
 	}
 
 }
