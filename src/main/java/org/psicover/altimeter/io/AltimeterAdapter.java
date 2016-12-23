@@ -1,4 +1,4 @@
-package org.psicover.altimeter;
+package org.psicover.altimeter.io;
 
 import java.io.UnsupportedEncodingException;
 

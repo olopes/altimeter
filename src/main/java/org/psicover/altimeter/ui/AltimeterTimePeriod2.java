@@ -1,10 +1,11 @@
-package org.psicover.altimeter;
+package org.psicover.altimeter.ui;
 
 import java.io.Serializable;
 import java.util.Calendar;
 
 import org.jfree.data.time.RegularTimePeriod;
 import org.jfree.data.time.Second;
+import org.psicover.altimeter.bean.SampleRate;
 
 public class AltimeterTimePeriod2 extends RegularTimePeriod implements Serializable {
 	private static final long serialVersionUID = -6349245393675620158L;

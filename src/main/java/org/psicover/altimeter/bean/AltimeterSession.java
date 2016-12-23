@@ -1,7 +1,10 @@
-package org.psicover.altimeter;
+package org.psicover.altimeter.bean;
 
-public class AltimeterSession {
+import java.io.Serializable;
 
+public class AltimeterSession implements Serializable {
+	private static final long serialVersionUID = 7568228676336430042L;
+	
 	private AltimeterSample[] data;
 	private SampleRate rate;
 

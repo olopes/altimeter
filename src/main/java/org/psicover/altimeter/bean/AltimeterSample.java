@@ -1,10 +1,17 @@
-package org.psicover.altimeter;
+package org.psicover.altimeter.bean;
 
-public class AltimeterSample {
+import java.io.Serializable;
+
+import org.psicover.altimeter.Physics;
+
+public class AltimeterSample implements Serializable {
+	
+	private static final long serialVersionUID = 3486851249061761488L;
+	
 	private byte temperature;
 	private int pressure;
-	private boolean altitudeCalc=false;
-	private double altitude;
+	private transient boolean altitudeCalc;
+	private transient double altitude;
 
 	public AltimeterSample() {
 	}

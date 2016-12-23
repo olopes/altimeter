@@ -1,4 +1,4 @@
-package org.psicover.altimeter;
+package org.psicover.altimeter.io;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,12 +8,19 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.psicover.altimeter.Physics;
+import org.psicover.altimeter.bean.AltimeterFile;
+import org.psicover.altimeter.bean.AltimeterSample;
+import org.psicover.altimeter.bean.AltimeterSession;
+import org.psicover.altimeter.bean.SampleRate;
+import org.psicover.altimeter.ui.AltimeterIOException;
+
 /**
  * Read and write FDA/HKA files
  * @author oscar
  *
  */
-public class AltimeterFileIO {
+public class AltimeterFileReader {
 	private static String signatureAsHex(byte[] signature) {
 		StringBuilder sb = new StringBuilder();
 		for(byte c : signature) {
@@ -23,7 +30,7 @@ public class AltimeterFileIO {
 		return sb.toString();
 	}
 
-	public static List<AltimeterSession> readFile(File f) {
+	public static AltimeterFile readFile(File f) throws AltimeterIOException {
 		
 		List<AltimeterSession> result = new ArrayList<>();
 		Pattern sigPatt = Pattern.compile("070fda1000ca(..)00", Pattern.CASE_INSENSITIVE);
@@ -79,17 +86,16 @@ public class AltimeterFileIO {
 				session.setData(samples.toArray(new AltimeterSample[samples.size()]));
 			}
 		} catch(IOException e) {
-			e.printStackTrace();
 			result = null;
+			throw new AltimeterIOException(e);
 		}
-		return result;
-		
+		return new AltimeterFile(f.getName(), result);
 	}
 	
 	
-	public static void main(String[] args) {
-		List<AltimeterSession> sessions = readFile(new File("session20161211.fda"));
-		for(AltimeterSession session : sessions) {
+	public static void main(String[] args) throws Exception {
+		AltimeterFile altimeterFile = readFile(new File("session20161211.fda"));
+		for(AltimeterSession session : altimeterFile.getSessions()) {
 			int sr = session.getRate().samplesPerSecond();
 			AltimeterSample[] data = session.getData();
 			System.out.println();

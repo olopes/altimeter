@@ -1,5 +1,7 @@
 package org.psicover.altimeter;
 
+import org.psicover.altimeter.bean.AltimeterSample;
+
 public class Physics {
 
 	public static double altitute(AltimeterSample altimeterSample) {

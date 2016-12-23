@@ -1,6 +1,8 @@
-package org.psicover.altimeter;
+package org.psicover.altimeter.bean;
 
-public enum SampleRate {
+import java.io.Serializable;
+
+public enum SampleRate implements Serializable {
 	RATE_1HZ,
 	RATE_2HZ,
 	RATE_4HZ,
