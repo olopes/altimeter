@@ -216,13 +216,16 @@ public class AltimeterVisualization extends JFrame {
 		if(jfc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
 		
 		lastDirectory = jfc.getCurrentDirectory();
+		readFile(jfc.getSelectedFile());
+	}
+	
+	private void readFile(File f) {
 		try {
-			this.currentFile = AltimeterFileReader.readFile(jfc.getSelectedFile());
+			this.currentFile = AltimeterFileReader.readFile(f);
 			createCharts(this.currentFile);
 		} catch (AltimeterIOException e) {
 			displayError(e);
 		}
-
 	}
 
 	private void doExportData() {
@@ -459,10 +462,12 @@ public class AltimeterVisualization extends JFrame {
 		JOptionPane.showMessageDialog(null, panel, "An error has occurred", JOptionPane.ERROR_MESSAGE);		
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {  //Note 1
             public void run() {
             	AltimeterVisualization window = new AltimeterVisualization();
+        		if(args != null && args.length == 1)
+        			window.readFile(new File(args[0]));
                 window.setVisible(true);
             }
         });
