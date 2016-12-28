@@ -15,10 +15,17 @@ import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.ui.AltimeterIOException;
 
-public class XlsxFileWriter {
+public class XlsxFileWriter implements IExportDataAdapter {
+	private static IExportDataAdapter instance;
+	public static IExportDataAdapter getInstance() {
+		if(instance == null)
+			instance = new XlsxFileWriter();
+		return instance;
+	}
+	private XlsxFileWriter() {
+	}
 
-	public static void write(AltimeterFile currentFile, File selectedFile) throws AltimeterIOException {
-		// TODO Auto-generated method stub
+	public void write(AltimeterFile data, AltimeterSession ignore, File selectedFile) throws AltimeterIOException {
 		try(SXSSFWorkbook wb = new SXSSFWorkbook(100)) { // keep 100 rows in memory, exceeding rows will be flushed to disk
 			// wb.setCompressTempFiles(true); // temp files will be gzipped
 			try (FileOutputStream fout = new FileOutputStream(selectedFile)){
@@ -30,7 +37,7 @@ public class XlsxFileWriter {
 				CellStyle csAlt = wb.createCellStyle();
 				csAlt.setDataFormat((short)4); // "#,##0.00"
 
-				AltimeterSession[] sessions = currentFile.getSessions();
+				AltimeterSession[] sessions = data.getSessions();
 
 				for(int tab = 0; tab < sessions.length; tab++) {
 					// String title = pane.getTitleAt(tab); 

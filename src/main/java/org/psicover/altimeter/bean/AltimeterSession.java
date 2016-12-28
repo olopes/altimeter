@@ -26,5 +26,4 @@ public class AltimeterSession implements Serializable {
 	public void setRate(SampleRate rate) {
 		this.rate = rate;
 	}
-
 }

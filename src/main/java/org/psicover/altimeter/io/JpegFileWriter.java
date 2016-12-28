@@ -7,21 +7,20 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.psicover.altimeter.ui.AltimeterIOException;
 
-public class PngFileWriter implements IExportChartAdapter {
+public class JpegFileWriter implements IExportChartAdapter {
 
 	private static IExportChartAdapter instance;
 	public static IExportChartAdapter getInstance() {
 		if(instance == null)
-			instance = new PngFileWriter();
+			instance = new JpegFileWriter();
 		return instance;
 	}
-	private PngFileWriter() {
+	private JpegFileWriter() {
 	}
-
 
 	public void write(JFreeChart chart, File selectedFile, int x, int y) throws AltimeterIOException {
 		try {
-			ChartUtilities.saveChartAsPNG(selectedFile, chart, x, y);
+			ChartUtilities.saveChartAsJPEG(selectedFile, chart, x, y);
 		} catch (IOException e) {
 			throw new AltimeterIOException(e);
 		}

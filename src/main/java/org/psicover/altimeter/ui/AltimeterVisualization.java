@@ -26,6 +26,7 @@ import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
@@ -47,6 +48,9 @@ import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.bean.SampleRate;
 import org.psicover.altimeter.io.AltimeterFileReader;
 import org.psicover.altimeter.io.DlmFileWriter;
+import org.psicover.altimeter.io.IExportChartAdapter;
+import org.psicover.altimeter.io.IExportDataAdapter;
+import org.psicover.altimeter.io.JpegFileWriter;
 import org.psicover.altimeter.io.OdsFileWriter;
 import org.psicover.altimeter.io.PngFileWriter;
 import org.psicover.altimeter.io.SvgFileWriter;
@@ -59,15 +63,22 @@ public class AltimeterVisualization extends JFrame {
 	private JTabbedPane pane = new JTabbedPane();
 	private JMenu fileMenu = new JMenu("File");
 	private JMenuItem open = new JMenuItem("Open");
-	private JMenuItem exportCSV = new JMenuItem("Export CSV");
-	private JMenuItem exportXLS = new JMenuItem("Export XLSX");
-	private JMenuItem exportODS = new JMenuItem("Export ODS");
-	private JMenuItem exportPNG = new JMenuItem("Export PNG");
-	private JMenuItem exportSVG = new JMenuItem("Export SVG");
+	private JMenuItem exportData = new JMenuItem("Export Data");
+	private JMenuItem exportChart = new JMenuItem("Export Chart");
 	private JMenuItem exit = new JMenuItem("Exit");
 	private File lastDirectory = new File(".");
 	private AltimeterFile currentFile;
+	
+	private FileFilter fileFilterXls = new ExportDataFileFilter(XlsxFileWriter.getInstance(),"Excel spreadsheet (*.xlsx)", "xlsx");
+	private FileFilter fileFilterOds = new ExportDataFileFilter(OdsFileWriter.getInstance(),"ODF Spreadsheet (*.ods)", "ods");
+	private FileFilter fileFilterTsv = new ExportDataFileFilter(DlmFileWriter.getTsvInstance(),"Tab Delimited Values (*.tsv, *.tab)", "tsv", "tab");
+	private FileFilter fileFilterCsv = new ExportDataFileFilter(DlmFileWriter.getCsvInstance(),"Comma Delimited Values (*.csv)", "csv");
+	private FileFilter fileFilterSsv = new ExportDataFileFilter(DlmFileWriter.getSsvInstance(),"Semicolon Delimited Values (*.csv)", "csv");
 
+	private FileFilter fileFilterPng = new ExportChartFileFilter(PngFileWriter.getInstance(),"PNG image (*.png)", "png");
+	private FileFilter fileFilterJpg = new ExportChartFileFilter(JpegFileWriter.getInstance(),"Jpeg image (*.jpg, *.jpeg)", "jpg", "jpeg");
+	private FileFilter fileFilterSvg = new ExportChartFileFilter(SvgFileWriter.getInstance(),"SVG image (*.svg)", "svg");
+	
 	public AltimeterVisualization() {
 		setupUI();
 	}
@@ -79,19 +90,12 @@ public class AltimeterVisualization extends JFrame {
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(pane, BorderLayout.CENTER);
 		
-		exportCSV.setEnabled(false);
-		exportXLS.setEnabled(false);
-		exportODS.setEnabled(false);
-		exportPNG.setEnabled(false);
-		exportSVG.setEnabled(false);
+		exportData.setEnabled(false);
+		exportChart.setEnabled(false);
 		fileMenu.add(open);
 		fileMenu.addSeparator();
-		fileMenu.add(exportCSV);
-		fileMenu.add(exportXLS);
-		fileMenu.add(exportODS);
-		fileMenu.addSeparator();
-		fileMenu.add(exportPNG);
-		fileMenu.add(exportSVG);
+		fileMenu.add(exportData);
+		fileMenu.add(exportChart);
 		fileMenu.addSeparator();
 		fileMenu.add(exit);
 		
@@ -101,34 +105,16 @@ public class AltimeterVisualization extends JFrame {
 				doOpen();
 			}
 		});
-		exportCSV.addActionListener(new ActionListener() {
+		exportData.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				doExportCSV();
+				doExportData();
 			}
 		});
-		exportXLS.addActionListener(new ActionListener() {
+		exportChart.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				doExportXLS();
-			}
-		});
-		exportODS.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doExportODS();
-			}
-		});
-		exportPNG.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doExportPNG();
-			}
-		});
-		exportSVG.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doExportSVG();
+				doExportChart();
 			}
 		});
 		exit.addActionListener(new ActionListener() {
@@ -145,128 +131,143 @@ public class AltimeterVisualization extends JFrame {
 	}
 	
 	
-	// XXX Refactor to extract methods and use SwingWorker 
+	private class ExportDataWorker extends SwingWorker<Void, Void> {
+		IExportDataAdapter adapter;
+		AltimeterFile data;
+		AltimeterSession currentSession;
+		File outputFile;
+		AltimeterIOException error;
+		
+		public ExportDataWorker(IExportDataAdapter adapter, AltimeterFile data, AltimeterSession currentSession, File outputFile) {
+			this.adapter=adapter;
+			this.data=data;
+			this.currentSession= currentSession;
+			this.outputFile=outputFile;
+			this.error=null;
+			exportData.setEnabled(false);
+		}
+		
+		@Override
+		protected Void doInBackground() throws Exception {
+			try {
+				adapter.write(data, currentSession, outputFile);
+			} catch(AltimeterIOException e) {
+				error = e;
+			}
+			return null;
+		}
+
+		@Override
+		protected void done() {
+			if(error == null)
+				JOptionPane.showMessageDialog(AltimeterVisualization.this, "Done!");
+			else
+				displayError(error);
+			exportData.setEnabled(true);
+		}
+		
+		
+		
+	}
+	
+	private class ExportChartWorker extends SwingWorker<Void, Void> {
+		IExportChartAdapter adapter;
+		JFreeChart chart;
+		File outputFile;
+		int x,y;
+		AltimeterIOException error;
+		
+		public ExportChartWorker(IExportChartAdapter adapter, JFreeChart chart, File outputFile, int x, int y) {
+			this.adapter=adapter;
+			this.chart=chart;
+			this.outputFile=outputFile;
+			this.x = x;
+			this.y = y;
+			this.error=null;
+			exportChart.setEnabled(false);
+		}
+		
+		@Override
+		protected Void doInBackground() throws Exception {
+			try {
+				adapter.write(chart, outputFile, x, y);
+			} catch(AltimeterIOException e) {
+				error = e;
+			}
+			return null;
+		}
+
+		@Override
+		protected void done() {
+			if(error == null)
+				JOptionPane.showMessageDialog(AltimeterVisualization.this, "Done!");
+			else
+				displayError(error);
+			exportChart.setEnabled(true);
+		}
+	}
+	
 	
 	private void doOpen() {
 		JFileChooser jfc = new JFileChooser(lastDirectory);
-		jfc.addChoosableFileFilter(new FileNameExtensionFilter("Altimeter data (*.hka, *.fda)", "hka", "fda"));
-		if(jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			lastDirectory = jfc.getCurrentDirectory();
-			try {
-				this.currentFile = AltimeterFileReader.readFile(jfc.getSelectedFile());
-				createCharts(this.currentFile);
-			} catch (AltimeterIOException e) {
-				displayError(e);
-			}
-		}
+		FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("Altimeter data (*.hka, *.fda)", "hka", "fda");
+		jfc.addChoosableFileFilter(fileFilter);
+		jfc.setFileFilter(fileFilter);
+		if(jfc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
 		
+		lastDirectory = jfc.getCurrentDirectory();
+		try {
+			this.currentFile = AltimeterFileReader.readFile(jfc.getSelectedFile());
+			createCharts(this.currentFile);
+		} catch (AltimeterIOException e) {
+			displayError(e);
+		}
+
 	}
 
-	private void doExportCSV() {
+	private void doExportData() {
 		JPanel panel = (JPanel)pane.getSelectedComponent();
 		if(panel == null) return;
 		JFileChooser jfc = new JFileChooser(lastDirectory);
-		FileNameExtensionFilter fileFilterTsv = new FileNameExtensionFilter("Tab Delimited Values (*.tsv, *.tab)", "tsv", "tab");
-		FileNameExtensionFilter fileFilterCsv = new FileNameExtensionFilter("Comma Delimited Values (*.csv)", "csv");
-		FileNameExtensionFilter fileFilterSsv = new FileNameExtensionFilter("Semicolon Delimited Values (*.csv)", "csv");
+		jfc.addChoosableFileFilter(fileFilterXls);
+		jfc.addChoosableFileFilter(fileFilterOds);
 		jfc.addChoosableFileFilter(fileFilterTsv);
 		jfc.addChoosableFileFilter(fileFilterCsv);
 		jfc.addChoosableFileFilter(fileFilterSsv);
-		jfc.setFileFilter(fileFilterTsv);
+		jfc.setAcceptAllFileFilterUsed(false);
+		jfc.setFileFilter(fileFilterXls);
 
-		if(jfc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			lastDirectory = jfc.getCurrentDirectory();
-			// TODO add extension if necessary
-			FileFilter selectedFilter = jfc.getFileFilter();
-			try {
-				AltimeterSession session = (AltimeterSession) panel.getClientProperty("raw session");
-				if(selectedFilter == fileFilterCsv)
-					DlmFileWriter.writeCsv(session, jfc.getSelectedFile());
-				else if(selectedFilter == fileFilterSsv)
-					DlmFileWriter.writeSsv(session, jfc.getSelectedFile());
-				else
-					DlmFileWriter.writeTsv(session, jfc.getSelectedFile());  // tab as default
-			} catch (AltimeterIOException e) {
-				displayError(e);
-			}
-		}
-	}
-	private void doExportXLS() {
-		JFileChooser jfc = new JFileChooser(lastDirectory);
-		FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("Excel spreadsheet (*.xlsx)", "xlsx");
-		jfc.setFileFilter(fileFilter);
-		if(jfc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			lastDirectory = jfc.getCurrentDirectory();
-			// TODO add extension if necessary
+		if(jfc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
-			try {
-				XlsxFileWriter.write(this.currentFile, jfc.getSelectedFile());
-			} catch (AltimeterIOException e) {
-				displayError(e);
-			}
-		}
-	}
-
-	private void doExportODS() {
-		JFileChooser jfc = new JFileChooser(lastDirectory);
-		FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("ODF Spreadsheet (*.ods)", "ods");
-		jfc.setFileFilter(fileFilter);
-		if(jfc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			lastDirectory = jfc.getCurrentDirectory();
-			// TODO add extension if necessary
-			try {
-				OdsFileWriter.write(this.currentFile, jfc.getSelectedFile());
-			} catch (AltimeterIOException e) {
-				displayError(e);
-			}
-			
-		}
-		
+		lastDirectory = jfc.getCurrentDirectory();
+		ExportDataFileFilter selectedFilter = (ExportDataFileFilter) jfc.getFileFilter();
+		File selectedFile = selectedFilter.ensureFileExtension(jfc.getSelectedFile());
+		IExportDataAdapter export = selectedFilter.getAdapter();
+		AltimeterSession currentSession = (AltimeterSession) panel.getClientProperty("raw session");
+		new ExportDataWorker(export, currentFile, currentSession, selectedFile).execute();
 	}
 	
-	private void doExportPNG() {
+	private void doExportChart() {
 		JPanel panel = (JPanel)pane.getSelectedComponent();
 		if(panel == null) return;
 		ChartPanel chartPanel = (ChartPanel) panel.getComponent(0);
 		JFileChooser jfc = new JFileChooser(lastDirectory);
-		FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("PNG image (*.png)", "png");
-		jfc.setFileFilter(fileFilter);
-		if(jfc.showSaveDialog(this)==JFileChooser.APPROVE_OPTION) {
-			lastDirectory = jfc.getCurrentDirectory();
-			// TODO add extension if necessary
-			JFreeChart chart = chartPanel.getChart();
-			int x = panel.getWidth();
-			int y = panel.getHeight();
+		jfc.addChoosableFileFilter(fileFilterPng);
+		jfc.addChoosableFileFilter(fileFilterJpg);
+		jfc.addChoosableFileFilter(fileFilterSvg);
+		jfc.setAcceptAllFileFilterUsed(false);
+		jfc.setFileFilter(fileFilterPng);
+		if(jfc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+		
+		lastDirectory = jfc.getCurrentDirectory();
+		JFreeChart chart = chartPanel.getChart();
+		int x = panel.getWidth();
+		int y = panel.getHeight();
+		ExportChartFileFilter selectedFilter = (ExportChartFileFilter) jfc.getFileFilter();
+		File selectedFile = selectedFilter.ensureFileExtension(jfc.getSelectedFile());
+		IExportChartAdapter export = selectedFilter.getAdapter();
 
-			try {
-				PngFileWriter.write(chart, jfc.getSelectedFile(), x, y);
-			} catch (AltimeterIOException e) {
-				displayError(e);
-			}
-		}
-	}
-
-	private void doExportSVG() {
-		JPanel panel = (JPanel)pane.getSelectedComponent();
-		if(null == panel) return;
-		ChartPanel chartPanel = (ChartPanel) panel.getComponent(0);
-
-		JFileChooser jfc = new JFileChooser(lastDirectory);
-		FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("SVG image (*.svg)", "svg");
-		jfc.setFileFilter(fileFilter);
-		if(jfc.showSaveDialog(this)==JFileChooser.APPROVE_OPTION) {
-			// TODO add extension if necessary
-			lastDirectory = jfc.getCurrentDirectory();
-			JFreeChart chart = chartPanel.getChart();
-			int x = panel.getWidth();
-			int y = panel.getHeight();
-
-			try {
-				SvgFileWriter.write(chart, jfc.getSelectedFile(), x, y);
-			} catch (AltimeterIOException e) {
-				displayError(e);
-			}
-		}
+		new ExportChartWorker(export, chart, selectedFile, x, y).execute();
 	}
 
 	private void doExit() {
@@ -276,11 +277,8 @@ public class AltimeterVisualization extends JFrame {
 	
 	private void createCharts(AltimeterFile altimeterFile) {
 		if(null == altimeterFile) return; // TODO display error
-		exportCSV.setEnabled(true);
-		exportXLS.setEnabled(true);
-		exportODS.setEnabled(true);
-		exportPNG.setEnabled(true);
-		exportSVG.setEnabled(true);
+		exportData.setEnabled(true);
+		exportChart.setEnabled(true);
 
 		int i = 0;
 		for(AltimeterSession session : altimeterFile.getSessions()) {
@@ -361,12 +359,10 @@ public class AltimeterVisualization extends JFrame {
 				private static final long serialVersionUID = 9200880572231520816L;
 				@Override
 	        	public StringBuffer format(double number, StringBuffer result, FieldPosition fieldPosition) {
-	        		// TODO Auto-generated method stub
 	        		return super.format(number/1000, result, fieldPosition);
 	        	}
 	        	@Override
 	        	public StringBuffer format(long number, StringBuffer result, FieldPosition fieldPosition) {
-	        		// TODO Auto-generated method stub
 	        		return super.format(number/1000L, result, fieldPosition);
 	        	}
 	        });

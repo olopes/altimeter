@@ -14,9 +14,18 @@ import org.psicover.altimeter.ui.AltimeterIOException;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
-public class SvgFileWriter {
+public class SvgFileWriter implements IExportChartAdapter {
 
-	public static void write(JFreeChart chart, File selectedFile, int x, int y) throws AltimeterIOException {
+	private static IExportChartAdapter instance;
+	public static IExportChartAdapter getInstance() {
+		if(instance == null)
+			instance = new SvgFileWriter();
+		return instance;
+	}
+	private SvgFileWriter() {
+	}
+
+	public void write(JFreeChart chart, File selectedFile, int x, int y) throws AltimeterIOException {
 		DOMImplementation domImpl = SVGDOMImplementation.getDOMImplementation();
 		Document document = domImpl.createDocument(null, "svg", null);
 		SVGGraphics2D svgGenerator = new SVGGraphics2D(document);

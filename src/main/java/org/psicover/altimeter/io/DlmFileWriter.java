@@ -6,29 +6,37 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 
+import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.ui.AltimeterIOException;
 
-public class DlmFileWriter {
-
-	public static void writeCsv(AltimeterSession session, File selectedFile) throws AltimeterIOException {
-		writeDlm(session, selectedFile, ',');
+public class DlmFileWriter implements IExportDataAdapter {
+	private static IExportDataAdapter tsvInstance;
+	private static IExportDataAdapter csvInstance;
+	private static IExportDataAdapter ssvInstance;
+	public static IExportDataAdapter getTsvInstance() {
+		if(tsvInstance == null)
+			tsvInstance = new DlmFileWriter('\t');
+		return tsvInstance;
+	}
+	public static IExportDataAdapter getCsvInstance() {
+		if(csvInstance == null)
+			csvInstance = new DlmFileWriter(',');
+		return csvInstance;
+	}
+	public static IExportDataAdapter getSsvInstance() {
+		if(ssvInstance == null)
+			ssvInstance = new DlmFileWriter(';');
+		return ssvInstance;
 	}
 	
-	public static void writeSsv(AltimeterSession session, File selectedFile) throws AltimeterIOException {
-		writeDlm(session, selectedFile, ';');
+	private final char delimiter;
+	private DlmFileWriter(char delimiter) {
+		this.delimiter = delimiter;
 	}
 	
-	public static void writeTsv(AltimeterSession session, File selectedFile) throws AltimeterIOException {
-		writeDlm(session, selectedFile, '\t');
-	}
-	
-	public static void write(AltimeterSession session, File selectedFile) throws AltimeterIOException {
-		writeDlm(session, selectedFile, '\t');
-	}
-	
-	public static void writeDlm(AltimeterSession session, File selectedFile, char delimiter) throws AltimeterIOException {
+	public void write(AltimeterFile ignore, AltimeterSession session, File selectedFile) throws AltimeterIOException {
 		try (PrintWriter out = new PrintWriter(new FileWriter(selectedFile))){
 			out.printf("TIME%1$cPRESSURE%1$cTEMPERATURE%1$cALTITUDE%n", delimiter);
 			long tuIncr = 1000/session.getRate().samplesPerSecond(); // millis per sample
