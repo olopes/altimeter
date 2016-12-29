@@ -13,7 +13,6 @@ import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.bean.SampleRate;
-import org.psicover.altimeter.ui.AltimeterIOException;
 
 /**
  * Read and write FDA/HKA files

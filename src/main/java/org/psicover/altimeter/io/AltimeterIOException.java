@@ -1,4 +1,4 @@
-package org.psicover.altimeter.ui;
+package org.psicover.altimeter.io;
 
 import java.io.IOException;
 

@@ -10,7 +10,6 @@ import java.io.Writer;
 import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.jfree.chart.JFreeChart;
-import org.psicover.altimeter.ui.AltimeterIOException;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 

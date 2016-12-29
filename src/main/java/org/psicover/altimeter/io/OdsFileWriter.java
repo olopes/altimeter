@@ -10,7 +10,6 @@ import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.bean.AltimeterTableModel;
-import org.psicover.altimeter.ui.AltimeterIOException;
 
 public class OdsFileWriter implements IExportDataAdapter {
 

@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSession;
-import org.psicover.altimeter.ui.AltimeterIOException;
 
 public interface IExportDataAdapter {
 	

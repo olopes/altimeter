@@ -13,7 +13,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
-import org.psicover.altimeter.ui.AltimeterIOException;
 
 public class XlsxFileWriter implements IExportDataAdapter {
 	private static IExportDataAdapter instance;

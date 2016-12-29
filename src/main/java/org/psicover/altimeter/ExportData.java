@@ -5,11 +5,11 @@ import java.io.File;
 import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.io.AltimeterFileReader;
+import org.psicover.altimeter.io.AltimeterIOException;
 import org.psicover.altimeter.io.DlmFileWriter;
 import org.psicover.altimeter.io.IExportDataAdapter;
 import org.psicover.altimeter.io.OdsFileWriter;
 import org.psicover.altimeter.io.XlsxFileWriter;
-import org.psicover.altimeter.ui.AltimeterIOException;
 
 public class ExportData {
 	

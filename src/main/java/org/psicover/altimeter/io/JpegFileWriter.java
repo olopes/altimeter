@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.psicover.altimeter.ui.AltimeterIOException;
 
 public class JpegFileWriter implements IExportChartAdapter {
 

@@ -9,7 +9,6 @@ import java.util.Locale;
 import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
-import org.psicover.altimeter.ui.AltimeterIOException;
 
 public class DlmFileWriter implements IExportDataAdapter {
 	private static IExportDataAdapter tsvInstance;

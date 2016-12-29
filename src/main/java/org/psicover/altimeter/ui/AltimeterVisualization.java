@@ -31,6 +31,7 @@ import org.jfree.chart.JFreeChart;
 import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.io.AltimeterFileReader;
+import org.psicover.altimeter.io.AltimeterIOException;
 import org.psicover.altimeter.io.DlmFileWriter;
 import org.psicover.altimeter.io.IExportChartAdapter;
 import org.psicover.altimeter.io.IExportDataAdapter;
