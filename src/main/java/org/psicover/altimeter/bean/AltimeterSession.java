@@ -26,4 +26,13 @@ public class AltimeterSession implements Serializable {
 	public void setRate(SampleRate rate) {
 		this.rate = rate;
 	}
+	
+	public String getSessionDuration() {
+		int duration = rate.duration(data.length);
+		int hours = duration/3600;
+		int durm = duration%3600;
+		int minutes = durm/60;
+		int seconds = durm%60;
+		return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+	}
 }

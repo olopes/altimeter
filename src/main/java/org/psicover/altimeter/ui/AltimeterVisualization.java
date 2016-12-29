@@ -1,7 +1,6 @@
 package org.psicover.altimeter.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -10,8 +9,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -22,30 +19,17 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
-import org.jfree.data.time.DateRange;
-import org.jfree.data.time.RegularTimePeriod;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
 import org.psicover.altimeter.bean.AltimeterFile;
-import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
-import org.psicover.altimeter.bean.SampleRate;
 import org.psicover.altimeter.io.AltimeterFileReader;
 import org.psicover.altimeter.io.DlmFileWriter;
 import org.psicover.altimeter.io.IExportChartAdapter;
@@ -229,7 +213,7 @@ public class AltimeterVisualization extends JFrame {
 	}
 
 	private void doExportData() {
-		JPanel panel = (JPanel)pane.getSelectedComponent();
+		AltimeterChartPanel panel = (AltimeterChartPanel)pane.getSelectedComponent();
 		if(panel == null) return;
 		JFileChooser jfc = new JFileChooser(lastDirectory);
 		jfc.addChoosableFileFilter(fileFilterXls);
@@ -246,7 +230,7 @@ public class AltimeterVisualization extends JFrame {
 		ExportDataFileFilter selectedFilter = (ExportDataFileFilter) jfc.getFileFilter();
 		File selectedFile = selectedFilter.ensureFileExtension(jfc.getSelectedFile());
 		IExportDataAdapter export = selectedFilter.getAdapter();
-		AltimeterSession currentSession = (AltimeterSession) panel.getClientProperty("raw session");
+		AltimeterSession currentSession = panel.getSession();
 		new ExportDataWorker(export, currentFile, currentSession, selectedFile).execute();
 	}
 	
@@ -279,161 +263,16 @@ public class AltimeterVisualization extends JFrame {
 	}
 	
 	private void createCharts(AltimeterFile altimeterFile) {
-		if(null == altimeterFile) return; // TODO display error
+		if(null == altimeterFile) return; // TODO display error ??
 		exportData.setEnabled(true);
 		exportChart.setEnabled(true);
 
 		int i = 0;
 		for(AltimeterSession session : altimeterFile.getSessions()) {
-			// TODO extract to custom panel class.
-			
 			i++;
-			AltimeterSample [] samples = session.getData();
-			int nsamples = samples.length;
-			SampleRate rate = session.getRate();
-			int duration = rate.duration(nsamples);
-			int hours = duration/3600;
-			int durm = duration%3600;
-			int minutes = durm/60;
-			int seconds = durm%60;
-			String title = String.format("Session %d - %02d:%02d:%02d", i, hours, minutes, seconds);
-			
-			
-			// TODO adjust ticks, scales, zoom, etc...
-			TimeSeriesCollection dataset = new TimeSeriesCollection();
-			TimeSeriesCollection tempDataSet = new TimeSeriesCollection();
-			TimeSeries altSeries = new TimeSeries("Altitude (m)");
-			TimeSeries altSSeries = new TimeSeries("Smoothed Altitude (m)");
-			TimeSeries tempSeries = new TimeSeries("Temperature (C)");
-			TimeSeries tempSSeries = new TimeSeries("Smoothed Temperature (C)");
-			RegularTimePeriod tp=new AltimeterTimePeriod(rate);
-			
-			double [] smoothAlt = new double[samples.length];
-			double [] smoothTem = new double[samples.length];
-			for(int j = 0; j < samples.length; j++) {
-				AltimeterSample sample = samples[j];
-				double alt = sample.getAltitude();
-				double tem = sample.getTemperature();
-				
-				// smooth curve
-				int cnt = 1;
-				double sumAlt = alt;
-				double sumTem = tem;
-				if(j > 0) {
-					cnt++;
-					sumAlt += smoothAlt[j-1];
-					sumTem += smoothTem[j-1];
-				} 
-				if (j+1 < samples.length) {
-					cnt++;
-					AltimeterSample next = samples[j+1];
-					sumAlt += next.getAltitude();
-					sumTem += next.getTemperature();
-				}
-				
-				smoothAlt[j] = sumAlt/cnt;
-				smoothTem[j] = sumTem/cnt;
-				
-				altSeries.add(tp, alt);
-				altSSeries.add(tp, smoothAlt[j]);
-				tempSeries.add(tp, tem);
-				tempSSeries.add(tp, smoothTem[j]);
-				tp = tp.next();
-			}
-			
-			dataset.addSeries(altSeries);
-			dataset.addSeries(altSSeries);
-			tempDataSet.addSeries(tempSeries);
-			tempDataSet.addSeries(tempSSeries);
-			
-			JFreeChart chart = ChartFactory.createXYLineChart(title,
-		            "Time (s)", "Altitude (m)", dataset);
-			
-	        final XYPlot plot = chart.getXYPlot();
-	        final NumberAxis axis2 = new NumberAxis("Temperature (C)");
-	        axis2.setAutoRangeIncludesZero(true);
-	        plot.setRangeAxis(1, axis2);
-	        plot.setDataset(1, tempDataSet);
-	        plot.mapDatasetToRangeAxis(1, 1);
-	        ((NumberAxis)plot.getRangeAxis()).setAutoRangeIncludesZero(false);
-	        
-	        final NumberAxis domainAxis = (NumberAxis) plot.getDomainAxis();
-	        domainAxis.setNumberFormatOverride(new DecimalFormat("##0") {
-				private static final long serialVersionUID = 9200880572231520816L;
-				@Override
-	        	public StringBuffer format(double number, StringBuffer result, FieldPosition fieldPosition) {
-	        		return super.format(number/1000, result, fieldPosition);
-	        	}
-	        	@Override
-	        	public StringBuffer format(long number, StringBuffer result, FieldPosition fieldPosition) {
-	        		return super.format(number/1000L, result, fieldPosition);
-	        	}
-	        });
-//	        
-//			DateAxis axis = (DateAxis) plot.getDomainAxis();
-//			axis.setDateFormatOverride(new SimpleDateFormat(dateFormat));
-	        
-			
-	        final StandardXYItemRenderer renderer2 = new StandardXYItemRenderer();
-	        renderer2.setSeriesPaint(0, Color.BLUE);
-	        // renderer2.setPlotShapes(true);
-	        // renderer.setToolTipGenerator(StandardXYToolTipGenerator.getTimeSeriesInstance());
-	        plot.setRenderer(1, renderer2);
-			
-			ChartPanel chartPanel = new ChartPanel(chart);
-			JPanel panel = new JPanel();
-			panel.setLayout(new BorderLayout());
-			panel.add(chartPanel, BorderLayout.CENTER);
-			panel.putClientProperty("raw session", session);
-			
-			// TODO input to set zoomLevel
-			final int stepSize = 100;
-			
-			// setup dos botoes
-			final JSlider slider = new JSlider(0, (int)(tp.getFirstMillisecond()/1000L), 0);
-			panel.add(slider, BorderLayout.SOUTH);
-			slider.addChangeListener(new ChangeListener() {
-				
-				@Override
-				public void stateChanged(ChangeEvent e) {
-		            int value = slider.getValue();
-		            DateRange range = new DateRange(value*1000,(value+stepSize)*1000);
-		            domainAxis.setRange(range);
-				}
-			});
-            DateRange range = new DateRange(0,stepSize*1000);
-            domainAxis.setRange(range);
-
-            // XXX I will use checkboxes instead
-            // http://stackoverflow.com/questions/24562775/setting-series-visiblity-to-false-also-hides-it-from-the-legend
-            // chartPanel.addChartMouseListener(new ChartMouseListener() {
-			// 	
-			// 	@Override
-			// 	public void chartMouseMoved(ChartMouseEvent event) {
-			// 		// TODO Auto-generated method stub
-			// 		
-			// 	}
-			// 	
-            //     @Override
-            //     public void chartMouseClicked(ChartMouseEvent event) {
-            //         ChartEntity entity = event.getEntity();
-            //         if (entity instanceof LegendItemEntity) {
-            //             //*
-            //             LegendItemEntity itemEntity = (LegendItemEntity) entity;
-            //             XYDataset dataset = (XYDataset) itemEntity.getDataset();
-            //             int index = dataset.indexOf(itemEntity.getSeriesKey());
-            //             XYPlot plot = (XYPlot) event.getChart().getPlot();
-            // 
-            //             //set the renderer to hide the series
-            //             XYItemRenderer renderer = plot.getRenderer();
-            //             renderer.setSeriesVisible(index, !renderer.isSeriesVisible(index), false);
-            //             renderer.setSeriesVisibleInLegend(index, true, false);
-            //             //*/        
-            //         }
-            //     }
-            // });            
+			AltimeterChartPanel panel = new AltimeterChartPanel(session, i);
             
-			pane.add(title, panel);
+			pane.add(panel.getTitle(), panel);
 		}
 	}
 	
