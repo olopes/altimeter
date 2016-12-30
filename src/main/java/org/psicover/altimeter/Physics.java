@@ -21,7 +21,7 @@ public class Physics {
 	private static double P0 = 44330.0D;
 	public static final double Pa2M(int pressure)
 	{
-		return P0 * (1.0D - Math.pow(pressure / 101325.0D, 0.19029495718363465D));
+		return P0 * (1.0D - Math.pow(pressure / sea_press, 0.19029495718363465D));
 	}
 	
 	// https://en.wikipedia.org/wiki/Hypsometric_equation

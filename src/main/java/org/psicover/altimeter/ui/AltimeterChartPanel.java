@@ -39,10 +39,10 @@ public class AltimeterChartPanel extends JPanel {
 	
 	public AltimeterChartPanel(AltimeterSession session, int sessionNum) {
 		this.session=session;
-		initComponents(sessionNum);
+		setupUI(sessionNum);
 	}
 	
-	private void initComponents(int sessionNum) {
+	private void setupUI(int sessionNum) {
 		setLayout(new BorderLayout());
 		AltimeterSample [] samples = session.getData();
 		SampleRate rate = session.getRate();
