@@ -8,7 +8,6 @@ import org.psicover.altimeter.io.AltimeterFileReader;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -18,14 +17,17 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 public class AltimeterFX extends Application {
 	
-	TabPane tabPane;
+	private TabPane tabPane;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		
         MenuBar menuBar = new MenuBar();
         
         Menu menuFile = new Menu("_File");
@@ -34,31 +36,23 @@ public class AltimeterFX extends Application {
         
         MenuItem open = new MenuItem("_Open");
         open.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+O"));
-        open.setOnAction(this::doOpen);
+        open.setOnAction(e -> doOpen(primaryStage));
         MenuItem exportData = new MenuItem("Export _Data");
         exportData.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+D"));
-        exportData.setOnAction(this::doExportData);
+        exportData.setOnAction(e -> doExportData(primaryStage));
         MenuItem exportChart = new MenuItem("_Export Chart");
         exportChart.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+E"));
-        exportChart.setOnAction(this::doExportChart);
+        exportChart.setOnAction(e -> doExportChart(primaryStage));
         MenuItem exit = new MenuItem("_Quit");
         exit.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+Q"));
-        exit.setOnAction(this::doExit);
+        exit.setOnAction(e -> doExit());
         
         menuFile.getItems().addAll(open, new SeparatorMenuItem(), exportData, exportChart, new SeparatorMenuItem(), exit);
         
-        TabPane tabPane = new TabPane();
+        tabPane = new TabPane();
         
         BorderPane root = new BorderPane(tabPane);
         root.setTop(menuBar);
-        
-        AltimeterFile ff = AltimeterFileReader.readFile(new File("vvv.fda"));
-        AltimeterSession [] sessions = ff.getSessions();
-        for(int i = 0; i < sessions.length; i++) {
-        	AltimeterChartPane chart = new AltimeterChartPane(sessions[i], i+1);
-        	Tab tab = new Tab("Session "+i, chart);
-        	tabPane.getTabs().add(tab);
-        }
         
         primaryStage.setScene(new Scene(root));
         primaryStage.setMaximized(true);
@@ -72,19 +66,49 @@ public class AltimeterFX extends Application {
 		super.stop();
 	}
 	
-	private void doOpen(ActionEvent evt) {
+	private void doOpen(Stage stage) {
 		System.out.println("Open sesame");
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Altimeter File");
+		ExtensionFilter filter = new ExtensionFilter("Altimeter data (*.hka, *.fda)", "*.hka", "*.fda");
+		fileChooser.getExtensionFilters().add(filter);
+		fileChooser.setSelectedExtensionFilter(filter);
+		
+		File f = fileChooser.showOpenDialog(stage);
+		if(f == null) return;
+
+		try {
+			AltimeterFile altFile = AltimeterFileReader.readFile(f);
+			loadCharts(altFile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
-	private void doExportData(ActionEvent evt) {
+	private void loadCharts(AltimeterFile altFile) {
+		if(null == altFile) return;
+
+		tabPane.getTabs().clear();
+		AltimeterSession[] sessions = altFile.getSessions();
+		for(int i = 0; i < sessions.length; i++) {
+			AltimeterChartPane chartPane = new AltimeterChartPane(sessions[i], i+1);
+			Tab tab = new Tab(chartPane.getTitle(), chartPane);
+        	tabPane.getTabs().add(tab);
+		}
+		tabPane.getSelectionModel().select(0);
+
+	}
+
+	private void doExportData(Stage stage) {
 		System.out.println("Export data");
 	}
 	
-	private void doExportChart(ActionEvent evt) {
+	private void doExportChart(Stage stage) {
 		System.out.println("Export chart");
 	}
 	
-	private void doExit(ActionEvent evt) {
+	private void doExit() {
 		System.out.println("Exit requested");
 		Platform.exit();
 	}

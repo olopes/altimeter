@@ -13,16 +13,15 @@ import javafx.scene.layout.StackPane;
 public class AltimeterChartPane extends BorderPane {
 
 	private final AltimeterSession session;
-	private final int sessionNum;
+	private final AltimeterChart chart;
 
 	public AltimeterChartPane(AltimeterSession session, int sessionNum) {
 		this.session = session;
-		this.sessionNum = sessionNum;
+		chart = new AltimeterChart(session, sessionNum);		
 		setupUI();
 	}
 
 	private void setupUI() {
-		AltimeterChart chart = new AltimeterChart(session, sessionNum);		
 		final ChartCanvas canvas = new ChartCanvas(chart);
 		StackPane stackPane = new StackPane(); 
         stackPane.getChildren().add(canvas);  
@@ -47,6 +46,14 @@ public class AltimeterChartPane extends BorderPane {
 
 		setCenter(stackPane);
 		setBottom(slider);
+	}
+
+	public String getTitle() {
+		return chart.getTitle().getText();
+	}
+	
+	public AltimeterSession getSession() {
+		return this.session;
 	}
 
 }
