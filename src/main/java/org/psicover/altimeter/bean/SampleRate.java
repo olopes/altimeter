@@ -19,7 +19,7 @@ public enum SampleRate implements Serializable {
 		return (1<<ordinal());
 	}
 	
-	public int duration(int numSamples) {
+	public double duration(double numSamples) {
 		return (numSamples/samplesPerSecond());
 	}
 	

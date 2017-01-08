@@ -63,6 +63,15 @@ public class AltimeterFileReader {
 			byte [] sampleData = new byte[4];
 			List<AltimeterSample> samples = new ArrayList<>();
 			AltimeterSession session = null;
+			float time = 0;
+			float tIncr = 0;
+			// these will be useful to estimate chart ranges
+			int minPa = Integer.MAX_VALUE;
+			int maxPa = Integer.MIN_VALUE;
+			int minTemp = Integer.MAX_VALUE;
+			int maxTemp = Integer.MIN_VALUE;
+			double minAlt = 10000;
+			double maxAlt = -10000;
 			while((r = in.read(sampleData))>0) {
 				if(sampleData[0] == -1 && sampleData[1] == -1 && sampleData[2] == -1 && sampleData[3] == -1) {
 					preamble = true;
@@ -71,14 +80,43 @@ public class AltimeterFileReader {
 						session.setData(samples.toArray(new AltimeterSample[samples.size()]));
 					}
 					SampleRate rate = SampleRate.findRate(sampleData[3]);
+					tIncr = 1.0f/rate.samplesPerSecond();
+					time = 0;
 					System.out.println("New session found. Sample rate: "+rate);
 					preamble = false;
 					samples = new ArrayList<>();
 					session = new AltimeterSession();
+					session.setLimits(minPa, maxPa, minTemp, maxTemp, minAlt, maxAlt);
 					session.setRate(rate);
 					result.add(session);
+					
+					// reset limits;
+					minPa = Integer.MAX_VALUE;
+					maxPa = Integer.MIN_VALUE;
+					minTemp = Integer.MAX_VALUE;
+					maxTemp = Integer.MIN_VALUE;
+					minAlt = 10000;
+					maxAlt = -10000;
 				} else {
-					samples.add(new AltimeterSample(sampleData));
+					AltimeterSample sample = new AltimeterSample(sampleData, time);
+					samples.add(sample);
+					time += tIncr;
+					
+					// check limits;
+					if(minPa < sample.getPressure())
+						minPa = sample.getPressure();
+					if(maxPa > sample.getPressure())
+						maxPa = sample.getPressure();
+					
+					if(minTemp < sample.getTemperature())
+						minTemp = sample.getTemperature();
+					if(maxTemp > sample.getTemperature())
+						maxTemp = sample.getTemperature();
+					
+					if(maxAlt < sample.getAltitude())
+						maxAlt = sample.getAltitude();
+					if(maxAlt > sample.getAltitude())
+						maxAlt = sample.getAltitude();
 				}
 			}
 			if(null != session) {
@@ -105,9 +143,9 @@ public class AltimeterFileReader {
 			int i = 0;
 			for(AltimeterSample sample : data) {
 				i++;
-				double h1 = Physics.Pa2M(sample.getPressure());
-				double h2 = Physics.keisanAltitude(sample.getPressure(), sample.getTemperature());
-				double h3 = Physics.wikipediaAltitude(sample.getPressure(), sample.getTemperature());
+				double h1 = Physics.pa2m.convert(sample.getPressure(), sample.getTemperature());
+				double h2 = Physics.keisan.convert(sample.getPressure(), sample.getTemperature());
+				double h3 = Physics.wiki.convert(sample.getPressure(), sample.getTemperature());
 				
 				double h = h3;
 				meanA += h;

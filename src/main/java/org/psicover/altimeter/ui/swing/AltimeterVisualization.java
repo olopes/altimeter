@@ -1,4 +1,4 @@
-package org.psicover.altimeter.ui;
+package org.psicover.altimeter.ui.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -23,6 +23,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -303,16 +304,20 @@ public class AltimeterVisualization extends JFrame {
 	}
 
 	public static void main(final String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {  //Note 1
-            public void run() {
-            	AltimeterVisualization window = new AltimeterVisualization();
-        		if(args != null && args.length == 1)
-        			window.readFile(new File(args[0]));
-                window.setVisible(true);
-            }
-        });
 
-		
+		try {
+			// Set System L&F
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+		}
+		SwingUtilities.invokeLater(new Runnable() { // Note 1
+			public void run() {
+				AltimeterVisualization window = new AltimeterVisualization();
+				if (args != null && args.length == 1)
+					window.readFile(new File(args[0]));
+				window.setVisible(true);
+			}
+		});
 
 	}
 

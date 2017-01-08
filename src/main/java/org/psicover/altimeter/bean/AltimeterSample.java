@@ -10,21 +10,22 @@ public class AltimeterSample implements Serializable {
 	
 	private byte temperature;
 	private int pressure;
+	private float time;
 	private transient boolean altitudeCalc;
 	private transient double altitude;
+	public final transient float x;
+	public final transient double y;
 
-	public AltimeterSample() {
+	public AltimeterSample(byte [] data, float time) {
+		this(data[0], data[1], data[2], data[3], time);
 	}
-
-	public AltimeterSample(byte [] data) {
-		this(data[0], data[1], data[2], data[3]);
-	}
-	public AltimeterSample(byte temp, byte pressh, byte pressm, byte pressl) {
+	public AltimeterSample(byte temp, byte pressh, byte pressm, byte pressl, float time) {
 		this.temperature = temp;
 		this.pressure = (pressh&0xff);
 		this.pressure = (this.pressure << 8)|(pressm&0xff);
 		this.pressure = (this.pressure << 8)|(pressl&0xff);
-		getAltitude();
+		this.x = this.time = time;
+		y = getAltitude();
 	}
 
 	public byte getTemperature() {
@@ -45,9 +46,17 @@ public class AltimeterSample implements Serializable {
 	
 	public double getAltitude() {
 		if(!altitudeCalc) {
-			altitude = Physics.wikipediaAltitude(getPressure(), getTemperature());
+			altitude = Physics.altitude(getPressure(), getTemperature());
 		}
 		return altitude;
+	}
+
+	public float getTime() {
+		return time;
+	}
+
+	public void setTime(float time) {
+		this.time = time;
 	}
 
 	@Override

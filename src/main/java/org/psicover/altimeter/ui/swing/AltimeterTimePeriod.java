@@ -1,4 +1,4 @@
-package org.psicover.altimeter.ui;
+package org.psicover.altimeter.ui.swing;
 
 import java.io.Serializable;
 import java.util.Calendar;
