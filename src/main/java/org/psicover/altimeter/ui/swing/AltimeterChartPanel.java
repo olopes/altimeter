@@ -1,9 +1,9 @@
 package org.psicover.altimeter.ui.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
@@ -32,26 +32,33 @@ public class AltimeterChartPanel extends JPanel {
 		
 		// TODO adjust ticks, scales, zoom, etc...
         ChartPanel chartPanel = new ChartPanel(chart, true, false, false, true, true);
-		JMenu toggleSeries = new JMenu("Toggle Series");
+		// JMenu toggleSeries = new JMenu("Toggle Series");
+		JPopupMenu toggleSeries = new JPopupMenu("Toggle Series");
 		JCheckBoxMenuItem toggAlt = new JCheckBoxMenuItem("Altitude", true);
 		JCheckBoxMenuItem toggSAlt = new JCheckBoxMenuItem("Smoothed Altitude", true);
 		JCheckBoxMenuItem toggFlight = new JCheckBoxMenuItem("Flight", true);
 		JCheckBoxMenuItem toggTemp = new JCheckBoxMenuItem("Temperature", true);
 		JCheckBoxMenuItem toggSTemp = new JCheckBoxMenuItem("Smoothed Temperature", true);
 		toggleSeries.add(toggAlt);
+		toggAlt.setForeground(Color.BLACK);
 		toggAlt.addChangeListener(new ToggleSeriesChangeListener(SeriesInfo.Altitude));
 		toggleSeries.add(toggSAlt);
+		toggSAlt.setForeground(Color.BLACK);
 		toggSAlt.addChangeListener(new ToggleSeriesChangeListener(SeriesInfo.SmoothedAltitude));
 		toggleSeries.add(toggFlight);
+		toggFlight.setForeground(Color.BLACK);
 		toggFlight.addChangeListener(new ToggleSeriesChangeListener(SeriesInfo.Flight));
 		toggleSeries.add(toggTemp);
+		toggTemp.setForeground(Color.BLACK);
 		toggTemp.addChangeListener(new ToggleSeriesChangeListener(SeriesInfo.Temperature));
 		toggleSeries.add(toggSTemp);
+		toggSTemp.setForeground(Color.BLACK);
 		toggSTemp.addChangeListener(new ToggleSeriesChangeListener(SeriesInfo.SmoothedTemperature));
-		
-		JPopupMenu contextMenu = chartPanel.getPopupMenu();
-		contextMenu.addSeparator();
-		contextMenu.add(toggleSeries);
+
+		chartPanel.setPopupMenu(toggleSeries);
+//		JPopupMenu contextMenu = chartPanel.getPopupMenu();
+//		contextMenu.addSeparator();
+//		contextMenu.add(toggleSeries);
 		
 		
 		// TODO input to set zoomLevel

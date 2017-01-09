@@ -148,7 +148,7 @@ public class AltimeterVisualization extends JFrame {
 			if(error == null)
 				JOptionPane.showMessageDialog(AltimeterVisualization.this, "Done!");
 			else
-				displayError(error);
+				displayError("Error exporting data to file "+outputFile.getName(), error);
 			exportData.setEnabled(true);
 		}
 		
@@ -188,7 +188,7 @@ public class AltimeterVisualization extends JFrame {
 			if(error == null)
 				JOptionPane.showMessageDialog(AltimeterVisualization.this, "Done!");
 			else
-				displayError(error);
+				displayError("Error exporting chart to file "+outputFile.getName(),error);
 			exportChart.setEnabled(true);
 		}
 	}
@@ -210,7 +210,7 @@ public class AltimeterVisualization extends JFrame {
 			this.currentFile = AltimeterFileReader.readFile(f);
 			createCharts(this.currentFile);
 		} catch (AltimeterIOException e) {
-			displayError(e);
+			displayError("Could not read altimeter file: "+f.getName(), e);
 		}
 	}
 
@@ -276,17 +276,17 @@ public class AltimeterVisualization extends JFrame {
 		}
 	}
 	
-	private void displayError(Throwable t) {
+	private void displayError(String msg, Throwable t) {
 		if(t == null) return;
-		
+		// adapted from http://code.makery.ch/blog/javafx-dialogs-official/		
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridBagLayout());
-		panel.setMaximumSize(new Dimension(400, 300));
+		panel.setPreferredSize(new Dimension(400, 300));
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx=0;
 		c.gridy=0;
 		c.fill=GridBagConstraints.HORIZONTAL;
-		panel.add(new JLabel("Please note the error below"), c);
+		panel.add(new JLabel(msg), c);
 		c.gridy=1;
 		c.fill=GridBagConstraints.BOTH;
 		c.weightx = c.weighty = 1;
@@ -295,7 +295,9 @@ public class AltimeterVisualization extends JFrame {
 		t.printStackTrace(pw);
 		pw.flush();
 		JTextArea ta = new JTextArea(sw.toString());
-		panel.add(new JScrollPane(ta), c);
+		ta.setEditable(false);
+		// ta.setLineWrap(true);
+		panel.add(new JScrollPane(ta, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS), c);
 		
 		// parent set to null to display the box centered on screen.
 		JOptionPane.showMessageDialog(null, panel, "An error has occurred", JOptionPane.ERROR_MESSAGE);		
