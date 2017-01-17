@@ -22,6 +22,7 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.TextAnchor;
 import org.psicover.altimeter.IPreferences;
+import org.psicover.altimeter.Messages;
 import org.psicover.altimeter.Preferences;
 import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
@@ -71,13 +72,13 @@ public class AltimeterChart extends JFreeChart {
 	}
 	
 	private static String formatTitle(AltimeterSession session, int sessionNum) {
-		return "Session "+sessionNum+" - "+session.getSessionDuration();
+		return Messages.getString("AltimeterChart.0", sessionNum, session.getSessionDuration()); //$NON-NLS-1$
 	}
 	
 	private static XYPlot createEmptyPlot() {
-        NumberAxis xAxis = new NumberAxis("Time (s)");
+        NumberAxis xAxis = new NumberAxis(Messages.getString("AltimeterChart.9")); //$NON-NLS-1$
         xAxis.setAutoRangeIncludesZero(true);
-        NumberAxis yAxis = new NumberAxis("Altitude (m)");
+        NumberAxis yAxis = new NumberAxis(Messages.getString("AltimeterChart.10")); //$NON-NLS-1$
         yAxis.setAutoRangeIncludesZero(false);
         XYItemRenderer renderer = new XYLineAndShapeRenderer(true, false);
         XYPlot plot = new XYPlot(new TimeSeriesCollection(), xAxis, yAxis, renderer);
@@ -97,11 +98,11 @@ public class AltimeterChart extends JFreeChart {
 		
 		TimeSeriesCollection altiDataset = (TimeSeriesCollection) getXYPlot().getDataset();
 		TimeSeriesCollection tempDataset = new TimeSeriesCollection();
-		TimeSeries altiRSeries = new TimeSeries("Altitude (m)");
-		TimeSeries altiSSeries = new TimeSeries("Smoothed Altitude (m)");
-		TimeSeries flightSeries = new TimeSeries("Flight");
-		TimeSeries tempRSeries = new TimeSeries("Temperature (C)");
-		TimeSeries tempSSeries = new TimeSeries("Smoothed Temperature (C)");
+		TimeSeries altiRSeries = new TimeSeries(Messages.getString("AltimeterChart.2")); //$NON-NLS-1$
+		TimeSeries altiSSeries = new TimeSeries(Messages.getString("AltimeterChart.3")); //$NON-NLS-1$
+		TimeSeries flightSeries = new TimeSeries(Messages.getString("AltimeterChart.4")); //$NON-NLS-1$
+		TimeSeries tempRSeries = new TimeSeries(Messages.getString("AltimeterChart.5")); //$NON-NLS-1$
+		TimeSeries tempSSeries = new TimeSeries(Messages.getString("AltimeterChart.6")); //$NON-NLS-1$
 		altiDataset.addSeries(altiRSeries);
 		altiDataset.addSeries(altiSSeries);
 		altiDataset.addSeries(flightSeries);
@@ -133,7 +134,7 @@ public class AltimeterChart extends JFreeChart {
         plot.setRangeGridlinePaint(GRID_GRAY);
         plot.setRangeGridlineStroke(DASH_LINE);
         
-        final NumberAxis axis2 = new NumberAxis("Temperature (C)");
+        final NumberAxis axis2 = new NumberAxis(Messages.getString("AltimeterChart.11")); //$NON-NLS-1$
         axis2.setAutoRangeIncludesZero(true);
         plot.setRangeAxis(1, axis2);
         plot.setDataset(1, tempDataset);
@@ -141,7 +142,7 @@ public class AltimeterChart extends JFreeChart {
         ((NumberAxis)plot.getRangeAxis()).setAutoRangeIncludesZero(false);
         
         final NumberAxis domainAxis = (NumberAxis) plot.getDomainAxis();
-        domainAxis.setNumberFormatOverride(new DecimalFormat("##0") {
+        domainAxis.setNumberFormatOverride(new DecimalFormat("##0") { //$NON-NLS-1$
 			private static final long serialVersionUID = 9200880572231520816L;
 			@Override
         	public StringBuffer format(double number, StringBuffer result, FieldPosition fieldPosition) {
@@ -239,7 +240,7 @@ public class AltimeterChart extends JFreeChart {
 			tempSSeries.add(tp, sumTemp/cnt, false);
 		}
 		
-		final TimeSeries altitudes = "smooth".equals(prefs.getFlightDetectionDataset())?altiSSeries:altiRSeries;
+		final TimeSeries altitudes = "smooth".equals(prefs.getFlightDetectionDataset())?altiSSeries:altiRSeries; //$NON-NLS-1$
 		// flight detection
 		final double launchDelta = prefs.getLaunchDelta(); // 5 meters is launch
 		final double landingDelta = prefs.getLandingDelta(); // 0.2 meters from initial launch height
@@ -274,7 +275,7 @@ public class AltimeterChart extends JFreeChart {
 					// set label
 					long start = launchTime.getFirstMillisecond();
 					long end = tp.getFirstMillisecond();
-					XYTextAnnotation flightMark = new XYTextAnnotation("Duration: "+((end-start)/1000)+" s", start, initialLaunch);
+					XYTextAnnotation flightMark = new XYTextAnnotation(Messages.getString("AltimeterChart.7", (end-start)/1000), start, initialLaunch); //$NON-NLS-1$
 					flightMark.setPaint(ORANGE);
 					flightMark.setTextAnchor(TextAnchor.TOP_LEFT);
 					// final Marker flightMark = new IntervalMarker(start, end, Color.RED);

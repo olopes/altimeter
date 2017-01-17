@@ -26,12 +26,12 @@ public class SvgFileWriter implements IExportChartAdapter {
 
 	public void write(JFreeChart chart, File selectedFile, int x, int y) throws AltimeterIOException {
 		DOMImplementation domImpl = SVGDOMImplementation.getDOMImplementation();
-		Document document = domImpl.createDocument(null, "svg", null);
+		Document document = domImpl.createDocument(null, "svg", null); //$NON-NLS-1$
 		SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
 		chart.draw(svgGenerator, new Rectangle(x, y));
 
 		boolean useCSS = true; // we want to use CSS style attribute
-		try (Writer out = new OutputStreamWriter(new FileOutputStream(selectedFile), "UTF-8")) {
+		try (Writer out = new OutputStreamWriter(new FileOutputStream(selectedFile), "UTF-8")) { //$NON-NLS-1$
 			svgGenerator.stream(out, useCSS);
 		} catch (IOException e) {
 			throw new AltimeterIOException(e);

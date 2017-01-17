@@ -37,6 +37,7 @@ import org.psicover.altimeter.Preferences;
 import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.bean.SampleRate;
+import org.psicover.altimeter.Messages;
 import org.psicover.altimeter.ui.swing.AltimeterTimePeriod;
 
 public class AltimeterChartHelper extends JPanel {
@@ -69,16 +70,16 @@ public class AltimeterChartHelper extends JPanel {
 		setLayout(new BorderLayout());
 		AltimeterSample [] samples = session.getData();
 		SampleRate rate = session.getRate();
-		title = "Session "+sessionNum+" - "+session.getSessionDuration();
+		title = Messages.getString("AltimeterChart.0", sessionNum, session.getSessionDuration()); //$NON-NLS-1$
 		
 		
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
 		TimeSeriesCollection tempDataSet = new TimeSeriesCollection();
-		TimeSeries altSeries = new TimeSeries("Altitude (m)");
-		TimeSeries altSSeries = new TimeSeries("Smoothed Altitude (m)");
-		TimeSeries flightSeries = new TimeSeries("Flight");
-		TimeSeries tempSeries = new TimeSeries("Temperature (C)");
-		TimeSeries tempSSeries = new TimeSeries("Smoothed Temperature (C)");
+		TimeSeries altSeries = new TimeSeries(Messages.getString("AltimeterChart.2")); //$NON-NLS-1$
+		TimeSeries altSSeries = new TimeSeries(Messages.getString("AltimeterChart.3")); //$NON-NLS-1$
+		TimeSeries flightSeries = new TimeSeries(Messages.getString("AltimeterChart.4")); //$NON-NLS-1$
+		TimeSeries tempSeries = new TimeSeries(Messages.getString("AltimeterChart.5")); //$NON-NLS-1$
+		TimeSeries tempSSeries = new TimeSeries(Messages.getString("AltimeterChart.6")); //$NON-NLS-1$
 		RegularTimePeriod tp=new AltimeterTimePeriod(rate);
 		
 		final IPreferences prefs = Preferences.getInstance();
@@ -137,7 +138,7 @@ public class AltimeterChartHelper extends JPanel {
 						// set label
 						long start = launchTime.getFirstMillisecond();
 						long end = tp.getFirstMillisecond();
-						XYTextAnnotation flightMark = new XYTextAnnotation("Duration: "+((end-start)/1000)+" s", start, initialLaunch);
+						XYTextAnnotation flightMark = new XYTextAnnotation(Messages.getString("AltimeterChart.7", (end-start)/1000), start, initialLaunch); //$NON-NLS-1$
 						flightMark.setPaint(ORANGE);
 						flightMark.setTextAnchor(TextAnchor.TOP_LEFT);
 //				        final Marker flightMark = new IntervalMarker(start, end, Color.RED);
@@ -162,7 +163,7 @@ public class AltimeterChartHelper extends JPanel {
 		tempDataSet.addSeries(tempSSeries);
 		
 		JFreeChart chart = ChartFactory.createXYLineChart(title,
-	            "Time (s)", "Altitude (m)", dataset);
+	            Messages.getString("AltimeterChart.9"), Messages.getString("AltimeterChart.10"), dataset); //$NON-NLS-1$ //$NON-NLS-2$
 		
         plot = chart.getXYPlot();
         plot.setBackgroundPaint(BG_GRAY);
@@ -173,7 +174,7 @@ public class AltimeterChartHelper extends JPanel {
         plot.setRangeGridlinePaint(GRID_GRAY);
         plot.setRangeGridlineStroke(DASH_LINE);
         
-        final NumberAxis axis2 = new NumberAxis("Temperature (C)");
+        final NumberAxis axis2 = new NumberAxis(Messages.getString("AltimeterChart.11")); //$NON-NLS-1$
         axis2.setAutoRangeIncludesZero(true);
         plot.setRangeAxis(1, axis2);
         plot.setDataset(1, tempDataSet);
@@ -181,7 +182,7 @@ public class AltimeterChartHelper extends JPanel {
         ((NumberAxis)plot.getRangeAxis()).setAutoRangeIncludesZero(false);
         
         final NumberAxis domainAxis = (NumberAxis) plot.getDomainAxis();
-        domainAxis.setNumberFormatOverride(new DecimalFormat("##0") {
+        domainAxis.setNumberFormatOverride(new DecimalFormat("##0") { //$NON-NLS-1$
 			private static final long serialVersionUID = 9200880572231520816L;
 			@Override
         	public StringBuffer format(double number, StringBuffer result, FieldPosition fieldPosition) {
@@ -204,12 +205,12 @@ public class AltimeterChartHelper extends JPanel {
 		
 		// TODO adjust ticks, scales, zoom, etc...
         chartPanel = new ChartPanel(chart, true, false, false, true, true);
-		JMenu toggleSeries = new JMenu("Toggle Series");
-		JCheckBoxMenuItem toggAlt = new JCheckBoxMenuItem("Altitude", true);
-		JCheckBoxMenuItem toggSAlt = new JCheckBoxMenuItem("Smoothed Altitude", true);
-		JCheckBoxMenuItem toggFlight = new JCheckBoxMenuItem("Flight", true);
-		JCheckBoxMenuItem toggTemp = new JCheckBoxMenuItem("Temperature", true);
-		JCheckBoxMenuItem toggSTemp = new JCheckBoxMenuItem("Smoothed Temperature", true);
+		JMenu toggleSeries = new JMenu(Messages.getString("AltimeterChart.13")); //$NON-NLS-1$
+		JCheckBoxMenuItem toggAlt = new JCheckBoxMenuItem(Messages.getString("AltimeterChart.14"), true); //$NON-NLS-1$
+		JCheckBoxMenuItem toggSAlt = new JCheckBoxMenuItem(Messages.getString("AltimeterChart.15"), true); //$NON-NLS-1$
+		JCheckBoxMenuItem toggFlight = new JCheckBoxMenuItem(Messages.getString("AltimeterChart.16"), true); //$NON-NLS-1$
+		JCheckBoxMenuItem toggTemp = new JCheckBoxMenuItem(Messages.getString("AltimeterChart.17"), true); //$NON-NLS-1$
+		JCheckBoxMenuItem toggSTemp = new JCheckBoxMenuItem(Messages.getString("AltimeterChart.18"), true); //$NON-NLS-1$
 		toggleSeries.add(toggAlt);
 		toggAlt.addChangeListener(new ToggleSeriesChangeListener(renderer1, 0));
 		toggleSeries.add(toggSAlt);

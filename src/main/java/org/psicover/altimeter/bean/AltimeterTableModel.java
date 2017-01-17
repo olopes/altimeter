@@ -39,13 +39,13 @@ public class AltimeterTableModel extends AbstractTableModel {
 	@Override
 	public String getColumnName(int columnIndex) {
 		if (columnIndex == 0)
-			return "TIME";
+			return "TIME"; //$NON-NLS-1$
 		else if (columnIndex == 1)
-			return "PRESSURE";
+			return "PRESSURE"; //$NON-NLS-1$
 		else if (columnIndex == 2)
-			return "TEMPERATURE";
+			return "TEMPERATURE"; //$NON-NLS-1$
 		else if (columnIndex == 3)
-			return "ALTITUDE";
+			return "ALTITUDE"; //$NON-NLS-1$
 		return null;
 	}
 

@@ -37,12 +37,12 @@ public class DlmFileWriter implements IExportDataAdapter {
 	
 	public void write(AltimeterFile ignore, AltimeterSession session, File selectedFile) throws AltimeterIOException {
 		try (PrintWriter out = new PrintWriter(new FileWriter(selectedFile))){
-			out.printf("TIME%1$cPRESSURE%1$cTEMPERATURE%1$cALTITUDE%n", delimiter);
+			out.printf("TIME%1$cPRESSURE%1$cTEMPERATURE%1$cALTITUDE%n", delimiter); //$NON-NLS-1$
 			long tuIncr = 1000/session.getRate().samplesPerSecond(); // millis per sample
 
 			long time = 0;
 			for(AltimeterSample sample : session.getData()) {
-				out.printf(Locale.ENGLISH,"%2$tH:%2$tM:%2$tS.%2$tL%1$c%3$d%1$c%4$d%1$c%5$.4f%n", delimiter, time, sample.getPressure(), sample.getTemperature(), sample.getAltitude());
+				out.printf(Locale.ENGLISH,"%2$tH:%2$tM:%2$tS.%2$tL%1$c%3$d%1$c%4$d%1$c%5$.4f%n", delimiter, time, sample.getPressure(), sample.getTemperature(), sample.getAltitude()); //$NON-NLS-1$
 				time+=tuIncr;
 			}
 		} catch (IOException e) {

@@ -12,6 +12,7 @@ import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.data.time.DateRange;
+import org.psicover.altimeter.Messages;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.ui.chart.AltimeterChart;
 import org.psicover.altimeter.ui.chart.AltimeterChart.SeriesInfo;
@@ -33,12 +34,12 @@ public class AltimeterChartPanel extends JPanel {
 		// TODO adjust ticks, scales, zoom, etc...
         ChartPanel chartPanel = new ChartPanel(chart, true, false, false, true, true);
 		// JMenu toggleSeries = new JMenu("Toggle Series");
-		JPopupMenu toggleSeries = new JPopupMenu("Toggle Series");
-		JCheckBoxMenuItem toggAlt = new JCheckBoxMenuItem("Altitude", true);
-		JCheckBoxMenuItem toggSAlt = new JCheckBoxMenuItem("Smoothed Altitude", true);
-		JCheckBoxMenuItem toggFlight = new JCheckBoxMenuItem("Flight", true);
-		JCheckBoxMenuItem toggTemp = new JCheckBoxMenuItem("Temperature", true);
-		JCheckBoxMenuItem toggSTemp = new JCheckBoxMenuItem("Smoothed Temperature", true);
+		JPopupMenu toggleSeries = new JPopupMenu(Messages.getString("AltimeterChartPanel.0")); //$NON-NLS-1$
+		JCheckBoxMenuItem toggAlt = new JCheckBoxMenuItem(Messages.getString("AltimeterChartPanel.1"), true); //$NON-NLS-1$
+		JCheckBoxMenuItem toggSAlt = new JCheckBoxMenuItem(Messages.getString("AltimeterChartPanel.2"), true); //$NON-NLS-1$
+		JCheckBoxMenuItem toggFlight = new JCheckBoxMenuItem(Messages.getString("AltimeterChartPanel.3"), true); //$NON-NLS-1$
+		JCheckBoxMenuItem toggTemp = new JCheckBoxMenuItem(Messages.getString("AltimeterChartPanel.4"), true); //$NON-NLS-1$
+		JCheckBoxMenuItem toggSTemp = new JCheckBoxMenuItem(Messages.getString("AltimeterChartPanel.5"), true); //$NON-NLS-1$
 		toggleSeries.add(toggAlt);
 		toggAlt.setForeground(Color.BLACK);
 		toggAlt.addChangeListener(new ToggleSeriesChangeListener(SeriesInfo.Altitude));

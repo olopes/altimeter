@@ -30,6 +30,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.psicover.altimeter.Messages;
 import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.io.AltimeterFileReader;
@@ -48,24 +49,24 @@ public class AltimeterVisualization extends JFrame {
 	private static final long serialVersionUID = -5356669458739782963L;
 	
 	private JTabbedPane pane = new JTabbedPane();
-	private JMenu fileMenu = new JMenu("File");
-	private JMenuItem open = new JMenuItem("Open");
-	private JMenuItem exportData = new JMenuItem("Export Data");
-	private JMenuItem exportChart = new JMenuItem("Export Chart");
-	private JMenuItem preferences = new JMenuItem("Preferences");
-	private JMenuItem exit = new JMenuItem("Quit");
-	private File lastDirectory = new File(".");
+	private JMenu fileMenu = new JMenu(Messages.getString("AltimeterVisualization.0")); //$NON-NLS-1$
+	private JMenuItem open = new JMenuItem(Messages.getString("AltimeterVisualization.1")); //$NON-NLS-1$
+	private JMenuItem exportData = new JMenuItem(Messages.getString("AltimeterVisualization.2")); //$NON-NLS-1$
+	private JMenuItem exportChart = new JMenuItem(Messages.getString("AltimeterVisualization.3")); //$NON-NLS-1$
+	private JMenuItem preferences = new JMenuItem(Messages.getString("AltimeterVisualization.4")); //$NON-NLS-1$
+	private JMenuItem exit = new JMenuItem(Messages.getString("AltimeterVisualization.5")); //$NON-NLS-1$
+	private File lastDirectory = new File("."); //$NON-NLS-1$
 	private AltimeterFile currentFile;
 	
-	private FileFilter fileFilterXls = new ExportDataFileFilter(XlsxFileWriter.getInstance(),"Excel spreadsheet (*.xlsx)", "xlsx");
-	private FileFilter fileFilterOds = new ExportDataFileFilter(OdsFileWriter.getInstance(),"ODF Spreadsheet (*.ods)", "ods");
-	private FileFilter fileFilterTsv = new ExportDataFileFilter(DlmFileWriter.getTsvInstance(),"Tab Delimited Values (*.tsv, *.tab)", "tsv", "tab");
-	private FileFilter fileFilterCsv = new ExportDataFileFilter(DlmFileWriter.getCsvInstance(),"Comma Delimited Values (*.csv)", "csv");
-	private FileFilter fileFilterSsv = new ExportDataFileFilter(DlmFileWriter.getSsvInstance(),"Semicolon Delimited Values (*.csv)", "csv");
+	private FileFilter fileFilterXls = new ExportDataFileFilter(XlsxFileWriter.getInstance(),Messages.getString("AltimeterVisualization.7"), "xlsx"); //$NON-NLS-1$ //$NON-NLS-2$
+	private FileFilter fileFilterOds = new ExportDataFileFilter(OdsFileWriter.getInstance(),Messages.getString("AltimeterVisualization.9"), "ods"); //$NON-NLS-1$ //$NON-NLS-2$
+	private FileFilter fileFilterTsv = new ExportDataFileFilter(DlmFileWriter.getTsvInstance(),Messages.getString("AltimeterVisualization.11"), "tsv", "tab"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	private FileFilter fileFilterCsv = new ExportDataFileFilter(DlmFileWriter.getCsvInstance(),Messages.getString("AltimeterVisualization.14"), "csv"); //$NON-NLS-1$ //$NON-NLS-2$
+	private FileFilter fileFilterSsv = new ExportDataFileFilter(DlmFileWriter.getSsvInstance(),Messages.getString("AltimeterVisualization.16"), "csv"); //$NON-NLS-1$ //$NON-NLS-2$
 
-	private FileFilter fileFilterPng = new ExportChartFileFilter(PngFileWriter.getInstance(),"PNG image (*.png)", "png");
-	private FileFilter fileFilterJpg = new ExportChartFileFilter(JpegFileWriter.getInstance(),"Jpeg image (*.jpg, *.jpeg)", "jpg", "jpeg");
-	private FileFilter fileFilterSvg = new ExportChartFileFilter(SvgFileWriter.getInstance(),"SVG image (*.svg)", "svg");
+	private FileFilter fileFilterPng = new ExportChartFileFilter(PngFileWriter.getInstance(),Messages.getString("AltimeterVisualization.18"), "png"); //$NON-NLS-1$ //$NON-NLS-2$
+	private FileFilter fileFilterJpg = new ExportChartFileFilter(JpegFileWriter.getInstance(),Messages.getString("AltimeterVisualization.20"), "jpg", "jpeg"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	private FileFilter fileFilterSvg = new ExportChartFileFilter(SvgFileWriter.getInstance(),Messages.getString("AltimeterVisualization.23"), "svg"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	public AltimeterVisualization() {
 		setupUI();
@@ -73,7 +74,7 @@ public class AltimeterVisualization extends JFrame {
 	
 	private void setupUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setTitle("Altimeter visualization");
+		setTitle(Messages.getString("AltimeterVisualization.25")); //$NON-NLS-1$
 		// setExtendedState(getExtendedState()|JFrame.MAXIMIZED_BOTH );
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(pane, BorderLayout.CENTER);
@@ -139,9 +140,9 @@ public class AltimeterVisualization extends JFrame {
 		@Override
 		protected void done() {
 			if(error == null)
-				JOptionPane.showMessageDialog(AltimeterVisualization.this, "Done!");
+				JOptionPane.showMessageDialog(AltimeterVisualization.this, Messages.getString("AltimeterVisualization.26")); //$NON-NLS-1$
 			else
-				displayError("Error exporting data to file "+outputFile.getName(), error);
+				displayError(Messages.getString("AltimeterVisualization.27", outputFile.getName()), error); //$NON-NLS-1$
 			exportData.setEnabled(true);
 		}
 		
@@ -179,9 +180,9 @@ public class AltimeterVisualization extends JFrame {
 		@Override
 		protected void done() {
 			if(error == null)
-				JOptionPane.showMessageDialog(AltimeterVisualization.this, "Done!");
+				JOptionPane.showMessageDialog(AltimeterVisualization.this, Messages.getString("AltimeterVisualization.28")); //$NON-NLS-1$
 			else
-				displayError("Error exporting chart to file "+outputFile.getName(),error);
+				displayError(Messages.getString("AltimeterVisualization.29", outputFile.getName()), error); //$NON-NLS-1$
 			exportChart.setEnabled(true);
 		}
 	}
@@ -189,7 +190,7 @@ public class AltimeterVisualization extends JFrame {
 	
 	private void doOpen() {
 		JFileChooser jfc = new JFileChooser(lastDirectory);
-		FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("Altimeter data (*.hka, *.fda)", "hka", "fda");
+		FileNameExtensionFilter fileFilter = new FileNameExtensionFilter(Messages.getString("AltimeterVisualization.30"), "hka", "fda"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		jfc.addChoosableFileFilter(fileFilter);
 		jfc.setFileFilter(fileFilter);
 		if(jfc.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
@@ -203,7 +204,7 @@ public class AltimeterVisualization extends JFrame {
 			this.currentFile = AltimeterFileReader.readFile(f);
 			createCharts(this.currentFile);
 		} catch (AltimeterIOException e) {
-			displayError("Could not read altimeter file: "+f.getName(), e);
+			displayError(Messages.getString("AltimeterVisualization.33", f.getName()), e); //$NON-NLS-1$
 		}
 	}
 
@@ -297,7 +298,7 @@ public class AltimeterVisualization extends JFrame {
 		panel.add(new JScrollPane(ta, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS), c);
 		
 		// parent set to null to display the box centered on screen.
-		JOptionPane.showMessageDialog(null, panel, "An error has occurred", JOptionPane.ERROR_MESSAGE);		
+		JOptionPane.showMessageDialog(null, panel, Messages.getString("AltimeterVisualization.34"), JOptionPane.ERROR_MESSAGE);		 //$NON-NLS-1$
 	}
 
 	public static void main(final String[] args) {

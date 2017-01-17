@@ -27,6 +27,7 @@ import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 
 import org.psicover.altimeter.IPreferences;
+import org.psicover.altimeter.Messages;
 import org.psicover.altimeter.Preferences;
 
 public class PreferencesDialog extends JDialog {
@@ -35,7 +36,7 @@ public class PreferencesDialog extends JDialog {
 	private BeanPropertyModel beanModel = new BeanPropertyModel(Preferences.getInstance()); 
 
 	public PreferencesDialog(JFrame parent) {
-		super(parent, "Preferences");
+		super(parent, Messages.getString("PreferencesDialog.0")); //$NON-NLS-1$
 		setupUI();
 	}
 	
@@ -49,10 +50,10 @@ public class PreferencesDialog extends JDialog {
 		JPanel stuff = new JPanel();
 		container.add(new JScrollPane(stuff), BorderLayout.CENTER);
 		
-		AbstractFormatter intFormatter = new NumberFormatter(new DecimalFormat("0"));
+		AbstractFormatter intFormatter = new NumberFormatter(new DecimalFormat("0")); //$NON-NLS-1$
 		AbstractFormatterFactory intFactory = new DefaultFormatterFactory(intFormatter);
 
-		AbstractFormatter doubleFormatter = new NumberFormatter(new DecimalFormat("0.000"));
+		AbstractFormatter doubleFormatter = new NumberFormatter(new DecimalFormat("0.000")); //$NON-NLS-1$
 		AbstractFormatterFactory doubleFactory = new DefaultFormatterFactory(doubleFormatter);
 		
 		stuff.setLayout(new GridBagLayout());
@@ -65,39 +66,38 @@ public class PreferencesDialog extends JDialog {
 		gc.insets=new Insets(1,1,1,1);
 	
 		{
-			PropPanel aec = new PropPanel("Algorithms and Constants");
-			aec.addRow("Sea Level Pressure", new JFormattedTextField(intFactory, prefs.getSeaLevelPressure()), "seaLevelPressure");
+			PropPanel aec = new PropPanel(Messages.getString("PreferencesDialog.3")); //$NON-NLS-1$
+			aec.addRow(Messages.getString("PreferencesDialog.4"), new JFormattedTextField(intFactory, prefs.getSeaLevelPressure()), "seaLevelPressure"); //$NON-NLS-1$ //$NON-NLS-2$
 			//  (specific gas constant for dry air)
-			aec.addRow("R", new JFormattedTextField(doubleFactory, prefs.getR()), "R");
-			// Unknown? precomputed?
-			aec.addRow("P0", new JFormattedTextField(doubleFactory, prefs.getR()), "P0");
-			JComboBox<String> altiForm = new JComboBox<>(new String[]{"keisan","p2a","wiki"});
+			aec.addRow(Messages.getString("PreferencesDialog.6"), new JFormattedTextField(doubleFactory, prefs.getR()), "R"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			JComboBox<String> altiForm = new JComboBox<>(new String[]{"keisan","wiki"}); //$NON-NLS-1$ //$NON-NLS-2$
 			altiForm.setSelectedItem(prefs.getAltitudeFormula());
-			aec.addRow("Altitude Formula", altiForm, "altitudeFormula");
+			aec.addRow(Messages.getString("PreferencesDialog.13"), altiForm, "altitudeFormula"); //$NON-NLS-1$ //$NON-NLS-2$
 			gc.gridy=0;
 			stuff.add(aec, gc);
 		}
 		
 		{
-			PropPanel aec = new PropPanel("Curve Smoothing");
-			aec.addRow("Window Size", new JFormattedTextField(intFactory, prefs.getSmoothWindowSize()), "smoothWindowSize");
+			PropPanel aec = new PropPanel(Messages.getString("PreferencesDialog.15")); //$NON-NLS-1$
+			aec.addRow(Messages.getString("PreferencesDialog.16"), new JFormattedTextField(intFactory, prefs.getSmoothWindowSize()), "smoothWindowSize"); //$NON-NLS-1$ //$NON-NLS-2$
 			gc.gridy=1;
 			stuff.add(aec, gc);
 		}
 		
 		{
-			PropPanel aec = new PropPanel("Flight Detection");
-			JComboBox<String> fdds = new JComboBox<>(new String[]{"raw","smooth"});
+			PropPanel aec = new PropPanel(Messages.getString("PreferencesDialog.18")); //$NON-NLS-1$
+			JComboBox<String> fdds = new JComboBox<>(new String[]{Messages.getString("PreferencesDialog.19"),Messages.getString("PreferencesDialog.20")}); //$NON-NLS-1$ //$NON-NLS-2$
 			fdds.setSelectedItem(prefs.getFlightDetectionDataset());
-			aec.addRow("Dataset", fdds, "flightDetectionDataset");
-			aec.addRow("Window Size", new JFormattedTextField(intFactory, prefs.getFlightWindowSize()), "flightWindowSize");
-			aec.addRow("Launch Delta", new JFormattedTextField(doubleFactory, prefs.getLaunchDelta()), "launchDelta");
-			aec.addRow("Landing Delta", new JFormattedTextField(doubleFactory, prefs.getLandingDelta()), "landingDelta");
+			aec.addRow(Messages.getString("PreferencesDialog.21"), fdds, "flightDetectionDataset"); //$NON-NLS-1$ //$NON-NLS-2$
+			aec.addRow(Messages.getString("PreferencesDialog.23"), new JFormattedTextField(intFactory, prefs.getFlightWindowSize()), "flightWindowSize"); //$NON-NLS-1$ //$NON-NLS-2$
+			aec.addRow(Messages.getString("PreferencesDialog.25"), new JFormattedTextField(doubleFactory, prefs.getLaunchDelta()), "launchDelta"); //$NON-NLS-1$ //$NON-NLS-2$
+			aec.addRow(Messages.getString("PreferencesDialog.27"), new JFormattedTextField(doubleFactory, prefs.getLandingDelta()), "landingDelta"); //$NON-NLS-1$ //$NON-NLS-2$
 			gc.gridy=2;
 			stuff.add(aec, gc);
 		}
-		JButton okButton = new JButton("Ok");
-		JButton cancelButton = new JButton("Cancel");
+		JButton okButton = new JButton(Messages.getString("PreferencesDialog.29")); //$NON-NLS-1$
+		JButton cancelButton = new JButton(Messages.getString("PreferencesDialog.30")); //$NON-NLS-1$
 		
 		okButton.addActionListener(l->saveAndClose());
 		cancelButton.addActionListener(l->closeWindow());
@@ -136,7 +136,7 @@ public class PreferencesDialog extends JDialog {
 		public void addRow(String label, JFormattedTextField component, String propName) {
 			addRow(label, component);
 			if(propName != null) {
-				component.addPropertyChangeListener("value", beanModel.bindListener(propName));
+				component.addPropertyChangeListener("value", beanModel.bindListener(propName)); //$NON-NLS-1$
 			}
 		}
 		
@@ -155,7 +155,7 @@ public class PreferencesDialog extends JDialog {
 		}
 		
 		private void addRow(String label, JComponent component) {
-			JLabel lbl = new JLabel(label==null?" ":label, SwingConstants.TRAILING);
+			JLabel lbl = new JLabel(label==null?" ":label, SwingConstants.TRAILING); //$NON-NLS-1$
 			gc.gridx=0;
 			gc.anchor=GridBagConstraints.LINE_END;
 			add(lbl, gc);

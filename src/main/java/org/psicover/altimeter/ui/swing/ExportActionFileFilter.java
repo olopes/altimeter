@@ -13,7 +13,7 @@ public abstract class ExportActionFileFilter extends FileFilter {
 		this.description = description;
 		this.extensions = new String [extensions.length];
 		for(int i = 0; i < extensions.length; i++)
-			this.extensions[i] = "."+extensions[i].toLowerCase();
+			this.extensions[i] = "."+extensions[i].toLowerCase(); //$NON-NLS-1$
 	}
 	
 	@Override

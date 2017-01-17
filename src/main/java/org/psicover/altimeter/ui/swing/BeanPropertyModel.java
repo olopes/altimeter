@@ -40,7 +40,7 @@ public class BeanPropertyModel {
 				this.properties.put(o.getName(), o);
 			
 		} catch (Exception e) {
-			logger.warning("Could not build properties map: "+e.getMessage());
+			logger.warning("Could not build properties map: "+e.getMessage()); //$NON-NLS-1$
 		}
 	}
 	
@@ -49,7 +49,7 @@ public class BeanPropertyModel {
 		try {
 			p.getWriteMethod().invoke(bean, value);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			logger.warning("Could not set property '"+property+"' value: "+e.getMessage());
+			logger.warning("Could not set property '"+property+"' value: "+e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
@@ -59,7 +59,7 @@ public class BeanPropertyModel {
 		try {
 			return p.getReadMethod().invoke(bean);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			logger.warning("Could not get property '"+property+"' value: "+e.getMessage());
+			logger.warning("Could not get property '"+property+"' value: "+e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return null;
 	}

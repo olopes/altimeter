@@ -39,7 +39,7 @@ public class AltimeterSession implements Serializable {
 		int durm = duration%3600;
 		int minutes = durm/60;
 		int seconds = durm%60;
-		return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+		return String.format("%02d:%02d:%02d", hours, minutes, seconds); //$NON-NLS-1$
 	}
 
 	public void setLimits(int minPa, int maxPa, int minTemp, int maxTemp, double minAlt, double maxAlt) {

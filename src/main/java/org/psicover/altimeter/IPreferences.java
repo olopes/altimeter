@@ -4,8 +4,6 @@ public interface IPreferences {
 
 	double getSeaLevelPressure();
 
-	double getP0();
-
 	double getR();
 
 	String getAltitudeFormula();

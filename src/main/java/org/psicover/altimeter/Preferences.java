@@ -51,7 +51,6 @@ public final class Preferences implements Serializable, IPreferences {
 
 	// constants used in physics module
 	private double seaLevelPressure = 101325;
-	private double P0 = 44330.0D;
 	private double R = 287.058;
 	private String altitudeFormula = "wiki";
 
@@ -81,15 +80,6 @@ public final class Preferences implements Serializable, IPreferences {
 
 	public void setSeaLevelPressure(double seaLevelPressure) {
 		this.seaLevelPressure = seaLevelPressure;
-	}
-
-	@Override
-	public double getP0() {
-		return P0;
-	}
-
-	public void setP0(double p0) {
-		P0 = p0;
 	}
 
 	@Override

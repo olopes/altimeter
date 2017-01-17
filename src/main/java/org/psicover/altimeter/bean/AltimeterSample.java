@@ -62,7 +62,9 @@ public class AltimeterSample implements Serializable {
 	@Override
 	public String toString() {
 		return new StringBuilder()
-				.append("T=").append(getTemperature()).append(" C; P=").append(getPressure()).append(" Pa")
+				.append("T=").append(getTemperature()) //$NON-NLS-1$
+				.append(" C; P=").append(getPressure()) //$NON-NLS-1$
+				.append(" Pa") //$NON-NLS-1$
 				.toString();
 	}
 }

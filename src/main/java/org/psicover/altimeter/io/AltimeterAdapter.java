@@ -20,7 +20,7 @@ public class AltimeterAdapter {
 				this.data[i] = (byte) data[i];
 			String msg;
 			try {
-				msg=new String(this.data, "ASCII");
+				msg=new String(this.data, "ASCII"); //$NON-NLS-1$
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 				msg="";
