@@ -1,6 +1,7 @@
 package org.psicover.altimeter.ui.jfx;
 
 import org.jfree.data.time.DateRange;
+import org.psicover.altimeter.Messages;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.ui.chart.AltimeterChart;
 import org.psicover.altimeter.ui.chart.AltimeterChart.SeriesInfo;
@@ -51,19 +52,19 @@ public class AltimeterChartPane extends BorderPane {
 		setBottom(slider);
 		
 		final ContextMenu contextMenu = new ContextMenu();
-		CheckMenuItem altitudeItem = new CheckMenuItem("Altitude");
+		CheckMenuItem altitudeItem = new CheckMenuItem(Messages.getString("AltimeterChartPane.0")); //$NON-NLS-1$
 		altitudeItem.setSelected(true);
 		altitudeItem.setOnAction(e -> chart.setSeriesVisible(SeriesInfo.Altitude, altitudeItem.isSelected()));
-		CheckMenuItem smoothAltitudeItem = new CheckMenuItem("Smoothed Altitude");
+		CheckMenuItem smoothAltitudeItem = new CheckMenuItem(Messages.getString("AltimeterChartPane.1")); //$NON-NLS-1$
 		smoothAltitudeItem.setSelected(true);
 		smoothAltitudeItem.setOnAction(e -> chart.setSeriesVisible(SeriesInfo.SmoothedAltitude, smoothAltitudeItem.isSelected()));
-		CheckMenuItem flightItem = new CheckMenuItem("Flight");
+		CheckMenuItem flightItem = new CheckMenuItem(Messages.getString("AltimeterChartPane.2")); //$NON-NLS-1$
 		flightItem.setSelected(true);
 		flightItem.setOnAction(e -> chart.setSeriesVisible(SeriesInfo.Flight, flightItem.isSelected()));
-		CheckMenuItem temperatureItem = new CheckMenuItem("Temperature");
+		CheckMenuItem temperatureItem = new CheckMenuItem(Messages.getString("AltimeterChartPane.3")); //$NON-NLS-1$
 		temperatureItem.setSelected(true);
 		temperatureItem.setOnAction(e -> chart.setSeriesVisible(SeriesInfo.Temperature, temperatureItem.isSelected()));
-		CheckMenuItem smoothTemperatureItem = new CheckMenuItem("Smoothed Temperature");
+		CheckMenuItem smoothTemperatureItem = new CheckMenuItem(Messages.getString("AltimeterChartPane.4")); //$NON-NLS-1$
 		smoothTemperatureItem.setSelected(true);
 		smoothTemperatureItem.setOnAction(e -> chart.setSeriesVisible(SeriesInfo.SmoothedTemperature, smoothTemperatureItem.isSelected()));
 

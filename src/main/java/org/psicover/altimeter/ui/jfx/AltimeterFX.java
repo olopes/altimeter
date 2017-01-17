@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.psicover.altimeter.Messages;
 import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSession;
 import org.psicover.altimeter.io.AltimeterFileReader;
@@ -39,23 +40,23 @@ public class AltimeterFX extends Application {
 		
         MenuBar menuBar = new MenuBar();
         
-        Menu menuFile = new Menu("_File");
+        Menu menuFile = new Menu(Messages.getString("AltimeterFX.0")); //$NON-NLS-1$
         
         menuBar.getMenus().add(menuFile);
         
-        MenuItem open = new MenuItem("_Open");
-        open.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+O"));
+        MenuItem open = new MenuItem(Messages.getString("AltimeterFX.1")); //$NON-NLS-1$
+        open.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+O")); //$NON-NLS-1$
         open.setOnAction(e -> doOpen(primaryStage));
-        exportData = new MenuItem("Export _Data");
-        exportData.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+D"));
+        exportData = new MenuItem(Messages.getString("AltimeterFX.3")); //$NON-NLS-1$
+        exportData.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+D")); //$NON-NLS-1$
         exportData.setOnAction(e -> doExportData(primaryStage));
         exportData.setDisable(true);
-        exportChart = new MenuItem("_Export Chart");
-        exportChart.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+E"));
+        exportChart = new MenuItem(Messages.getString("AltimeterFX.5")); //$NON-NLS-1$
+        exportChart.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+E")); //$NON-NLS-1$
         exportChart.setOnAction(e -> doExportChart(primaryStage));
         exportChart.setDisable(true);
-        MenuItem exit = new MenuItem("_Quit");
-        exit.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+Q"));
+        MenuItem exit = new MenuItem(Messages.getString("AltimeterFX.7")); //$NON-NLS-1$
+        exit.acceleratorProperty().setValue(KeyCombination.keyCombination("SHORTCUT+Q")); //$NON-NLS-1$
         exit.setOnAction(e -> doExit());
         
         menuFile.getItems().addAll(open, new SeparatorMenuItem(), exportData, exportChart, new SeparatorMenuItem(), exit);
@@ -67,21 +68,21 @@ public class AltimeterFX extends Application {
         
         primaryStage.setScene(new Scene(root));
         primaryStage.setMaximized(true);
-        primaryStage.setTitle("Altimeter Visualizer (JavaFX version)");
+        primaryStage.setTitle(Messages.getString("AltimeterFX.9")); //$NON-NLS-1$
         primaryStage.show();
 	}
 	
 	@Override
 	public void stop() throws Exception {
-		System.out.println("Graceful stop");
+		System.out.println("Graceful stop"); //$NON-NLS-1$
 		super.stop();
 	}
 	
 	private void doOpen(Stage stage) {
-		System.out.println("Open sesame");
+		System.out.println("Open sesame"); //$NON-NLS-1$
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open Altimeter File");
-		ExtensionFilter filter = new ExtensionFilter("Altimeter data (*.hka, *.fda)", "*.hka", "*.fda");
+		fileChooser.setTitle(Messages.getString("AltimeterFX.12")); //$NON-NLS-1$
+		ExtensionFilter filter = new ExtensionFilter(Messages.getString("AltimeterFX.13"), "*.hka", "*.fda"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		fileChooser.getExtensionFilters().add(filter);
 		fileChooser.setSelectedExtensionFilter(filter);
 		
@@ -94,7 +95,7 @@ public class AltimeterFX extends Application {
 			exportData.setDisable(false);
 			exportChart.setDisable(false);
 		} catch (Exception e) {
-			showError("Error loading altimeter file: "+f.getName(), e);
+			showError(Messages.getString("AltimeterFX.16")+f.getName(), e); //$NON-NLS-1$
 		}
 		
 	}
@@ -114,22 +115,22 @@ public class AltimeterFX extends Application {
 	}
 
 	private void doExportData(Stage stage) {
-		System.out.println("Export data");
+		System.out.println("Export data"); //$NON-NLS-1$
 	}
 	
 	private void doExportChart(Stage stage) {
-		System.out.println("Export chart");
+		System.out.println("Export chart"); //$NON-NLS-1$
 	}
 	
 	private void doExit() {
-		System.out.println("Exit requested");
+		System.out.println("Exit requested"); //$NON-NLS-1$
 		Platform.exit();
 	}
 	
 	private void showError(String msg, Exception ex) {
 		// http://code.makery.ch/blog/javafx-dialogs-official/
 		Alert alert = new Alert(AlertType.ERROR);
-		alert.setTitle("An error has occurred");
+		alert.setTitle(Messages.getString("AltimeterFX.20")); //$NON-NLS-1$
 		alert.setHeaderText(msg);
 		alert.setContentText(ex.getMessage());
 
@@ -139,7 +140,7 @@ public class AltimeterFX extends Application {
 		ex.printStackTrace(pw);
 		String exceptionText = sw.toString();
 
-		Label label = new Label("The exception stacktrace was:");
+		Label label = new Label(Messages.getString("AltimeterFX.21")); //$NON-NLS-1$
 
 		TextArea textArea = new TextArea(exceptionText);
 		textArea.setEditable(false);
