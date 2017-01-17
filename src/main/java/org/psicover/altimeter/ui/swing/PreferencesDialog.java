@@ -69,9 +69,9 @@ public class PreferencesDialog extends JDialog {
 			PropPanel aec = new PropPanel(Messages.getString("PreferencesDialog.3")); //$NON-NLS-1$
 			aec.addRow(Messages.getString("PreferencesDialog.4"), new JFormattedTextField(intFactory, prefs.getSeaLevelPressure()), "seaLevelPressure"); //$NON-NLS-1$ //$NON-NLS-2$
 			//  (specific gas constant for dry air)
-			aec.addRow(Messages.getString("PreferencesDialog.6"), new JFormattedTextField(doubleFactory, prefs.getR()), "R"); //$NON-NLS-1$ //$NON-NLS-2$
+			aec.addRow(Messages.getString("PreferencesDialog.6"), new JFormattedTextField(doubleFactory, prefs.getSeaLevelTemperature()), "seaLevelTemperature"); //$NON-NLS-1$ //$NON-NLS-2$
 			
-			JComboBox<String> altiForm = new JComboBox<>(new String[]{"keisan","wiki"}); //$NON-NLS-1$ //$NON-NLS-2$
+			JComboBox<String> altiForm = new JComboBox<>(new String[]{"keisan","wiki","hypso"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			altiForm.setSelectedItem(prefs.getAltitudeFormula());
 			aec.addRow(Messages.getString("PreferencesDialog.13"), altiForm, "altitudeFormula"); //$NON-NLS-1$ //$NON-NLS-2$
 			gc.gridy=0;

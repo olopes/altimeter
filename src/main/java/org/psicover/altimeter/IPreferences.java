@@ -4,8 +4,6 @@ public interface IPreferences {
 
 	double getSeaLevelPressure();
 
-	double getR();
-
 	String getAltitudeFormula();
 
 	int getSmoothWindowSize();
@@ -27,5 +25,8 @@ public interface IPreferences {
 	int getFlightWindowSize();
 
 	String getFlightDetectionDataset();
+	
+	double getSeaLevelTemperature();
 
+	int getCalibrationTime();
 }

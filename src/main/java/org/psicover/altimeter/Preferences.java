@@ -49,10 +49,13 @@ public final class Preferences implements Serializable, IPreferences {
 		}
 	}
 
+	private int calibrationTime = 10; // seconds
+	
 	// constants used in physics module
-	private double seaLevelPressure = 101325;
-	private double R = 287.058;
-	private String altitudeFormula = "wiki";
+	private double seaLevelPressure = 101325;    // Pa
+	// add property for avg temp
+	private double seaLevelTemperature = 288.15; // K
+	private String altitudeFormula = "hypso";
 
 	// smoothing
 	private int smoothWindowSize = 4;
@@ -80,15 +83,6 @@ public final class Preferences implements Serializable, IPreferences {
 
 	public void setSeaLevelPressure(double seaLevelPressure) {
 		this.seaLevelPressure = seaLevelPressure;
-	}
-
-	@Override
-	public double getR() {
-		return R;
-	}
-
-	public void setR(double r) {
-		R = r;
 	}
 
 	@Override
@@ -188,6 +182,23 @@ public final class Preferences implements Serializable, IPreferences {
 
 	public void setFlightDetectionDataset(String flightDetectionDataset) {
 		this.flightDetectionDataset = flightDetectionDataset;
+	}
+
+	@Override
+	public double getSeaLevelTemperature() {
+		return seaLevelTemperature;
+	}
+
+	public void setSeaLevelTemperature(double seaLevelTemperature) {
+		this.seaLevelTemperature = seaLevelTemperature;
+	}
+
+	public int getCalibrationTime() {
+		return calibrationTime;
+	}
+
+	public void setCalibrationTime(int calibrationTime) {
+		this.calibrationTime = calibrationTime;
 	}
 
 }
