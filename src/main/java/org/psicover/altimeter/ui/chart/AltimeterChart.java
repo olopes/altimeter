@@ -5,11 +5,8 @@ import java.awt.Color;
 import java.awt.Stroke;
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.event.RendererChangeEvent;
@@ -24,6 +21,7 @@ import org.jfree.data.time.RegularTimePeriod;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.TextAnchor;
+import org.psicover.altimeter.IPreferences;
 import org.psicover.altimeter.Preferences;
 import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
@@ -97,94 +95,34 @@ public class AltimeterChart extends JFreeChart {
 		SampleRate rate = session.getRate();
 		// title = "Session "+sessionNum+" - "+session.getSessionDuration();
 		
-		TimeSeriesCollection dataset = (TimeSeriesCollection) getXYPlot().getDataset();
-		TimeSeriesCollection tempDataSet = new TimeSeriesCollection();
-		TimeSeries altSeries = new TimeSeries("Altitude (m)");
-		TimeSeries altSSeries = new TimeSeries("Smoothed Altitude (m)");
+		TimeSeriesCollection altiDataset = (TimeSeriesCollection) getXYPlot().getDataset();
+		TimeSeriesCollection tempDataset = new TimeSeriesCollection();
+		TimeSeries altiRSeries = new TimeSeries("Altitude (m)");
+		TimeSeries altiSSeries = new TimeSeries("Smoothed Altitude (m)");
 		TimeSeries flightSeries = new TimeSeries("Flight");
-		TimeSeries tempSeries = new TimeSeries("Temperature (C)");
+		TimeSeries tempRSeries = new TimeSeries("Temperature (C)");
 		TimeSeries tempSSeries = new TimeSeries("Smoothed Temperature (C)");
+		altiDataset.addSeries(altiRSeries);
+		altiDataset.addSeries(altiSSeries);
+		altiDataset.addSeries(flightSeries);
+		tempDataset.addSeries(tempRSeries);
+		tempDataset.addSeries(tempSSeries);
+		
 		RegularTimePeriod tp=new AltimeterTimePeriod(rate);
-		
-		final Preferences prefs = Preferences.getInstance();
-		final int smthWindow=prefs.getSmoothWindowSize();
-		final int sStart = smthWindow-1, sEnd = samples.length-smthWindow;
-		
-		// flight detection
-		final double launchDelta = prefs.getLaunchDelta(); // 5 meters is launch
-		final double landingDelta = prefs.getLandingDelta(); // 0.2 meters from initial launch height
-		final int flightWindow = prefs.getFlightWindowSize()>0?prefs.getFlightWindowSize():rate.samplesPerSecond(); // changes in a second
-		final int fEnd = samples.length-flightWindow;
-		State state = State.GROUND;
-		Double initialLaunch = null;
-		RegularTimePeriod launchTime = null;
-		List<XYAnnotation> markers = new ArrayList<>();
-		
+		// create raw 
 		for(int i = 0; i < samples.length; i++) {
 			final AltimeterSample sample = samples[i];
 			final double alt = sample.getAltitude();
 			final double tem = sample.getTemperature();
-			altSeries.add(tp, alt);
-			tempSeries.add(tp, tem);
-			
-			// smooth curve
-			if(i > sStart && i < sEnd) {
-				int cnt = (2*smthWindow+1);
-				double sumAlt = alt;
-				double sumTemp = sample.getTemperature();
-				for(int j = 1; j <= smthWindow; j++) {
-					sumAlt += (samples[i-j].getAltitude()+samples[i+j].getAltitude());
-					sumTemp += (samples[i-j].getTemperature()+samples[i+j].getTemperature());
-				}
-				altSSeries.add(tp, sumAlt/cnt);
-				tempSSeries.add(tp, sumTemp/cnt);
-			}
-			
-			// flight mode detection
-			if(i < fEnd) {
-				// TODO: smooth this? use smoothed data? look into the past?
-				double sumAvg = 0.0;
-				for(int j = 1; j <= flightWindow; j++)
-					sumAvg += samples[i+j].getAltitude();
-				sumAvg = sumAvg/flightWindow;
-				
-				if(state == State.GROUND) {
-					// detect lauches
-					if(sumAvg-alt > launchDelta) {
-						state = State.FLIGHT;
-						initialLaunch = alt;
-						launchTime = tp;
-					}
-				} else {
-					// detect landings
-					if(sumAvg-initialLaunch < landingDelta) {
-						state = State.GROUND;
-						// set label
-						long start = launchTime.getFirstMillisecond();
-						long end = tp.getFirstMillisecond();
-						XYTextAnnotation flightMark = new XYTextAnnotation("Duration: "+((end-start)/1000)+" s", start, initialLaunch);
-						flightMark.setPaint(ORANGE);
-						flightMark.setTextAnchor(TextAnchor.TOP_LEFT);
-//				        final Marker flightMark = new IntervalMarker(start, end, Color.RED);
-//				        //currentEnd.setPaint(Color.red);
-//				        flightMark.setLabel("Duration: "+((end-start)/1000)+" s");
-//				        flightMark.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
-//				        flightMark.setLabelTextAnchor(TextAnchor.TOP_LEFT);
-				        markers.add(flightMark);
-						initialLaunch = null;
-					}
-				}
-				flightSeries.add(tp, initialLaunch);
-			}
-			
+			altiRSeries.add(tp, alt, false);
+			// altSSeries.add(tp, null, false);
+			// flightSeries.add(tp, null, false);
+			tempRSeries.add(tp, tem, false);
+			// tempSSeries.add(tp, null, false);
 			tp = tp.next();
 		}
 		
-		dataset.addSeries(altSeries);
-		dataset.addSeries(altSSeries);
-		dataset.addSeries(flightSeries);
-		tempDataSet.addSeries(tempSeries);
-		tempDataSet.addSeries(tempSSeries);
+        processChartData(altiDataset, tempDataset);
 		
 		XYPlot plot = getXYPlot();
         plot.setBackgroundPaint(BG_GRAY);
@@ -198,7 +136,7 @@ public class AltimeterChart extends JFreeChart {
         final NumberAxis axis2 = new NumberAxis("Temperature (C)");
         axis2.setAutoRangeIncludesZero(true);
         plot.setRangeAxis(1, axis2);
-        plot.setDataset(1, tempDataSet);
+        plot.setDataset(1, tempDataset);
         plot.mapDatasetToRangeAxis(1, 1);
         ((NumberAxis)plot.getRangeAxis()).setAutoRangeIncludesZero(false);
         
@@ -218,6 +156,7 @@ public class AltimeterChart extends JFreeChart {
 //		DateAxis axis = (DateAxis) plot.getDomainAxis();
 //		axis.setDateFormatOverride(new SimpleDateFormat(dateFormat));
         
+        
 		final XYItemRenderer renderer1 = plot.getRenderer();
         final StandardXYItemRenderer renderer2 = new StandardXYItemRenderer();
         // renderer2.setPlotShapes(true);
@@ -235,9 +174,6 @@ public class AltimeterChart extends JFreeChart {
         renderer2.setSeriesPaint(1, BLUEVIOLET);
         renderer2.setSeriesStroke(1,  BOLD_LINE);
 
-        for(XYAnnotation flightMark : markers)
-        	plot.addAnnotation(flightMark);
-        
 		// setup dos botoes
         DateRange range = new DateRange(0,100000);
         domainAxis.setRange(range);
@@ -269,5 +205,91 @@ public class AltimeterChart extends JFreeChart {
 	
 	public AltimeterSession getSession() {
 		return session;
+	}
+	
+	protected void processChartData(final TimeSeriesCollection altiDataSet, final TimeSeriesCollection tempDataSet) {
+		XYPlot plot = getXYPlot();
+        
+		TimeSeries altiRSeries = altiDataSet.getSeries(0);
+		TimeSeries altiSSeries = altiDataSet.getSeries(1);
+		TimeSeries flightSeries = altiDataSet.getSeries(2);
+		TimeSeries tempRSeries = tempDataSet.getSeries(0);
+		TimeSeries tempSSeries = tempDataSet.getSeries(1);
+        
+		final int dataLength = altiRSeries.getItemCount();
+		final IPreferences prefs = Preferences.getInstance();
+		final int smthWindow=prefs.getSmoothWindowSize();
+		final int sStart = smthWindow, sEnd = dataLength-smthWindow-1;
+		
+		// first pass: smooth curves
+		for(int i = sStart; i < sEnd; i++) {
+			final RegularTimePeriod tp = altiRSeries.getTimePeriod(i);
+			final double alti = altiRSeries.getValue(i).doubleValue();
+			final double temp = tempRSeries.getValue(i).doubleValue();
+			
+			// smooth curve
+			int cnt = (2*smthWindow+1);
+			double sumAlti = alti;
+			double sumTemp = temp;
+			for(int j = 1; j <= smthWindow; j++) {
+				sumAlti += (altiRSeries.getValue(i-j).doubleValue()+altiRSeries.getValue(i+j).doubleValue());
+				sumTemp += (tempRSeries.getValue(i-j).doubleValue()+tempRSeries.getValue(i+j).doubleValue());
+			}
+			altiSSeries.add(tp, sumAlti/cnt, false);
+			tempSSeries.add(tp, sumTemp/cnt, false);
+		}
+		
+		final TimeSeries altitudes = "smooth".equals(prefs.getFlightDetectionDataset())?altiSSeries:altiRSeries;
+		// flight detection
+		final double launchDelta = prefs.getLaunchDelta(); // 5 meters is launch
+		final double landingDelta = prefs.getLandingDelta(); // 0.2 meters from initial launch height
+		final int flightWindow = prefs.getFlightWindowSize()>0?prefs.getFlightWindowSize():getSession().getRate().samplesPerSecond(); // changes in a second
+		final int fStart = flightWindow, fEnd = dataLength-flightWindow-1;
+		State state = State.GROUND;
+		Double initialLaunch = null;
+		RegularTimePeriod launchTime = null;
+		
+		// second pass: flight detection
+		for(int i = fStart; i < fEnd; i++) {
+			final RegularTimePeriod tp = altiRSeries.getTimePeriod(i);
+			final double alti = altitudes.getValue(i).doubleValue();
+			// flight mode detection
+			// TODO: smooth this? use smoothed data? look into the past?
+			double sumAvg = 0.0;
+			for(int j = 1; j <= flightWindow; j++)
+				sumAvg += altitudes.getValue(i+j).doubleValue();
+			sumAvg = sumAvg/flightWindow;
+
+			if(state == State.GROUND) {
+				// detect lauches
+				if(sumAvg-alti > launchDelta) {
+					state = State.FLIGHT;
+					initialLaunch = alti;
+					launchTime = altitudes.getTimePeriod(i);
+				}
+			} else {
+				// detect landings
+				if(sumAvg-initialLaunch < landingDelta) {
+					state = State.GROUND;
+					// set label
+					long start = launchTime.getFirstMillisecond();
+					long end = tp.getFirstMillisecond();
+					XYTextAnnotation flightMark = new XYTextAnnotation("Duration: "+((end-start)/1000)+" s", start, initialLaunch);
+					flightMark.setPaint(ORANGE);
+					flightMark.setTextAnchor(TextAnchor.TOP_LEFT);
+					// final Marker flightMark = new IntervalMarker(start, end, Color.RED);
+					// //currentEnd.setPaint(Color.red);
+					// flightMark.setLabel("Duration: "+((end-start)/1000)+" s");
+					// flightMark.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
+					// flightMark.setLabelTextAnchor(TextAnchor.TOP_LEFT);
+					plot.addAnnotation(flightMark);
+					initialLaunch = null;
+				}
+			}
+			flightSeries.add(tp, initialLaunch, false);
+		}
+		
+
+
 	}
 }

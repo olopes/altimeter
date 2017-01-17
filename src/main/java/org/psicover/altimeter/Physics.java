@@ -40,7 +40,7 @@ public class Physics {
 	}
 	
 	static {
-		Preferences pref = Preferences.getInstance();
+		IPreferences pref = Preferences.getInstance();
 		String algo = pref.getAltitudeFormula();
 		// defaults wiki
 		AltitudeAlgorithm selAlgorithm = wiki;

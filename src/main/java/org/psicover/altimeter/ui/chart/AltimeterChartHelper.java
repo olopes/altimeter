@@ -32,6 +32,7 @@ import org.jfree.data.time.RegularTimePeriod;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.TextAnchor;
+import org.psicover.altimeter.IPreferences;
 import org.psicover.altimeter.Preferences;
 import org.psicover.altimeter.bean.AltimeterSample;
 import org.psicover.altimeter.bean.AltimeterSession;
@@ -80,7 +81,7 @@ public class AltimeterChartHelper extends JPanel {
 		TimeSeries tempSSeries = new TimeSeries("Smoothed Temperature (C)");
 		RegularTimePeriod tp=new AltimeterTimePeriod(rate);
 		
-		final Preferences prefs = Preferences.getInstance();
+		final IPreferences prefs = Preferences.getInstance();
 		final int smthWindow=prefs.getSmoothWindowSize();
 		final int sStart = smthWindow-1, sEnd = samples.length-smthWindow;
 		

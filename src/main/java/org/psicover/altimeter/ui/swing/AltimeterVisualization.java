@@ -4,8 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
@@ -51,7 +52,8 @@ public class AltimeterVisualization extends JFrame {
 	private JMenuItem open = new JMenuItem("Open");
 	private JMenuItem exportData = new JMenuItem("Export Data");
 	private JMenuItem exportChart = new JMenuItem("Export Chart");
-	private JMenuItem exit = new JMenuItem("Exit");
+	private JMenuItem preferences = new JMenuItem("Preferences");
+	private JMenuItem exit = new JMenuItem("Quit");
 	private File lastDirectory = new File(".");
 	private AltimeterFile currentFile;
 	
@@ -72,7 +74,7 @@ public class AltimeterVisualization extends JFrame {
 	private void setupUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("Altimeter visualization");
-		setExtendedState(getExtendedState()|JFrame.MAXIMIZED_BOTH );
+		// setExtendedState(getExtendedState()|JFrame.MAXIMIZED_BOTH );
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(pane, BorderLayout.CENTER);
 		
@@ -83,37 +85,28 @@ public class AltimeterVisualization extends JFrame {
 		fileMenu.add(exportData);
 		fileMenu.add(exportChart);
 		fileMenu.addSeparator();
+		fileMenu.add(preferences);
+		fileMenu.addSeparator();
 		fileMenu.add(exit);
 		
-		open.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doOpen();
-			}
-		});
-		exportData.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doExportData();
-			}
-		});
-		exportChart.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doExportChart();
-			}
-		});
-		exit.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doExit();
-			}
-		});
+		open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+		exportData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK));
+		exportChart.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK));
+		preferences.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK));
+		exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
+		
+		open.addActionListener(l->doOpen());
+		exportData.addActionListener(l->doExportData());
+		exportChart.addActionListener(l->doExportChart());
+		preferences.addActionListener(l->openPreferences());
+		exit.addActionListener(l->doExit());
 
 		
 		JMenuBar mbar = new JMenuBar();
 		mbar.add(fileMenu);
 		setJMenuBar(mbar);
+		setMinimumSize(new Dimension(640, 480));
+		pack();
 	}
 	
 	
@@ -262,6 +255,10 @@ public class AltimeterVisualization extends JFrame {
 	private void doExit() {
 		setVisible(false);
 		dispose();
+	}
+	
+	private void openPreferences() {
+		new PreferencesDialog(this).setVisible(true);
 	}
 	
 	private void createCharts(AltimeterFile altimeterFile) {

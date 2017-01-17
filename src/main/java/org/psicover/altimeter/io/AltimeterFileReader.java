@@ -5,9 +5,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.psicover.altimeter.LogFactory;
 import org.psicover.altimeter.Physics;
 import org.psicover.altimeter.bean.AltimeterFile;
 import org.psicover.altimeter.bean.AltimeterSample;
@@ -20,6 +22,8 @@ import org.psicover.altimeter.bean.SampleRate;
  *
  */
 public class AltimeterFileReader {
+	private final static Logger logger = LogFactory.getLogger(AltimeterFileReader.class);
+
 	private static String signatureAsHex(byte[] signature) {
 		StringBuilder sb = new StringBuilder();
 		for(byte c : signature) {
@@ -41,10 +45,10 @@ public class AltimeterFileReader {
 			if(r != signature.length) throw new IOException("Could not read file signature");
 			// validate file signature
 			String hexSig = signatureAsHex(signature);
-			System.out.println("Signature: "+hexSig);
+			logger.fine("Signature: "+hexSig);
 			Matcher matcher = sigPatt.matcher(hexSig);
 			if(matcher.matches()) {
-				System.out.println("Found good signature type: "+matcher.group(1));
+				logger.fine("Found good signature type: "+matcher.group(1));
 			} else {
 				throw new IOException("Unknown signature type: "+hexSig);
 			}
@@ -57,7 +61,7 @@ public class AltimeterFileReader {
 			int size = (header[1]&0xff)-2; // why??
 			size = size << 8 | (header[2]&0xff);
 			size = size << 8 | (header[3]&0xff);
-			System.out.println("File size: "+size);
+			logger.fine("File size: "+size);
 			
 			boolean preamble = true;
 			byte [] sampleData = new byte[4];
@@ -82,7 +86,7 @@ public class AltimeterFileReader {
 					SampleRate rate = SampleRate.findRate(sampleData[3]);
 					tIncr = 1.0f/rate.samplesPerSecond();
 					time = 0;
-					System.out.println("New session found. Sample rate: "+rate);
+					logger.fine("New session found. Sample rate: "+rate);
 					preamble = false;
 					samples = new ArrayList<>();
 					session = new AltimeterSession();

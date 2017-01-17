@@ -1,34 +1,51 @@
 package org.psicover.altimeter;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.File;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class Preferences implements Serializable {
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
+public final class Preferences implements Serializable, IPreferences {
+	
+	private static final Logger logger = LogFactory.getLogger(Preferences.class);
 	private static final long serialVersionUID = -4165253709603991239L;
-	private static final Preferences instance;
+	private static final String PREFERENCES_FILE ="preferences.xml";
+	private static final IPreferences instance;
 	static {
+		IPreferences prefs = new Preferences();
+		File f = new File(PREFERENCES_FILE);
 
-		Preferences prefs = new Preferences();
-		try (XMLDecoder dec = new XMLDecoder(new FileInputStream("preferences.xml"))) {
-			prefs = (Preferences) dec.readObject();
-		} catch (Throwable t) {
+		if(f.exists()) {
+			try {
+				JAXBContext jc = JAXBContext.newInstance( Preferences.class );
+				Unmarshaller u = jc.createUnmarshaller();
+				prefs = (IPreferences) u.unmarshal(new File(PREFERENCES_FILE));
+			} catch (Throwable t) {
+				logger.log(Level.SEVERE, "Could not read preferences file", t);
+			}
 		}
 
 		instance = prefs;
 	}
 
-	public static Preferences getInstance() {
+	public static IPreferences getInstance() {
 		return instance;
 	}
 
 	public static void savePreferences() {
-		try (XMLEncoder enc = new XMLEncoder(new FileOutputStream("preferences.xml"))) {
-			enc.writeObject(instance);
+		try {
+			JAXBContext jc = JAXBContext.newInstance( Preferences.class );
+			Marshaller m = jc.createMarshaller();
+			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			m.marshal(instance, new File(PREFERENCES_FILE));
 		} catch (Throwable t) {
+			logger.log(Level.SEVERE, "Could not write preferences file", t);
 		}
 	}
 
@@ -45,7 +62,8 @@ public class Preferences implements Serializable {
 	private double launchDelta = 5.0; // 5 meters is launch
 	private double landingDelta = 0.2; // 0.2 meters from initial launch height
 	private int flightWindowSize = 0; // 0 is rate.samplesPerSecond();
-	
+	private String flightDetectionDataset = "raw"; // or smooth
+
 	private String altRawColor;
 	private String altSmoothColor;
 	private String flightColor;
@@ -56,6 +74,7 @@ public class Preferences implements Serializable {
 
 	}
 
+	@Override
 	public double getSeaLevelPressure() {
 		return seaLevelPressure;
 	}
@@ -64,6 +83,7 @@ public class Preferences implements Serializable {
 		this.seaLevelPressure = seaLevelPressure;
 	}
 
+	@Override
 	public double getP0() {
 		return P0;
 	}
@@ -72,6 +92,7 @@ public class Preferences implements Serializable {
 		P0 = p0;
 	}
 
+	@Override
 	public double getR() {
 		return R;
 	}
@@ -80,6 +101,7 @@ public class Preferences implements Serializable {
 		R = r;
 	}
 
+	@Override
 	public String getAltitudeFormula() {
 		return altitudeFormula;
 	}
@@ -88,6 +110,7 @@ public class Preferences implements Serializable {
 		this.altitudeFormula = altitudeFormula;
 	}
 
+	@Override
 	public int getSmoothWindowSize() {
 		return smoothWindowSize;
 	}
@@ -96,6 +119,7 @@ public class Preferences implements Serializable {
 		this.smoothWindowSize = smoothWindowSize;
 	}
 
+	@Override
 	public String getAltRawColor() {
 		return altRawColor;
 	}
@@ -104,6 +128,7 @@ public class Preferences implements Serializable {
 		this.altRawColor = altRawColor;
 	}
 
+	@Override
 	public String getAltSmoothColor() {
 		return altSmoothColor;
 	}
@@ -112,6 +137,7 @@ public class Preferences implements Serializable {
 		this.altSmoothColor = altSmoothColor;
 	}
 
+	@Override
 	public String getFlightColor() {
 		return flightColor;
 	}
@@ -120,6 +146,7 @@ public class Preferences implements Serializable {
 		this.flightColor = flightColor;
 	}
 
+	@Override
 	public String getTempRawColor() {
 		return tempRawColor;
 	}
@@ -128,6 +155,7 @@ public class Preferences implements Serializable {
 		this.tempRawColor = tempRawColor;
 	}
 
+	@Override
 	public String getTempSmootColor() {
 		return tempSmootColor;
 	}
@@ -136,6 +164,7 @@ public class Preferences implements Serializable {
 		this.tempSmootColor = tempSmootColor;
 	}
 
+	@Override
 	public double getLaunchDelta() {
 		return launchDelta;
 	}
@@ -144,6 +173,7 @@ public class Preferences implements Serializable {
 		this.launchDelta = launchDelta;
 	}
 
+	@Override
 	public double getLandingDelta() {
 		return landingDelta;
 	}
@@ -152,12 +182,22 @@ public class Preferences implements Serializable {
 		this.landingDelta = landingDelta;
 	}
 
+	@Override
 	public int getFlightWindowSize() {
 		return flightWindowSize;
 	}
 
 	public void setFlightWindowSize(int flightWindowSize) {
 		this.flightWindowSize = flightWindowSize;
+	}
+
+	@Override
+	public String getFlightDetectionDataset() {
+		return flightDetectionDataset;
+	}
+
+	public void setFlightDetectionDataset(String flightDetectionDataset) {
+		this.flightDetectionDataset = flightDetectionDataset;
 	}
 
 }
