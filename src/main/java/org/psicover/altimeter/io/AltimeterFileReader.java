@@ -24,6 +24,52 @@ import org.psicover.altimeter.bean.SampleRate;
 public class AltimeterFileReader {
 	private final static Logger logger = LogFactory.getLogger(AltimeterFileReader.class);
 
+	private static class AltimeterFileSample implements AltimeterSample {
+			private final byte temperature;
+			private final int pressure;
+			private final float time;
+			private final double altitude;
+
+			public AltimeterFileSample(byte [] data, float time) {
+				this(data[0], data[1], data[2], data[3], time);
+			}
+			public AltimeterFileSample(byte temp, byte pressh, byte pressm, byte pressl, float time) {
+				this.temperature = temp;
+				int pressure = 0;
+				pressure = (pressh&0xff);
+				pressure = (pressure << 8)|(pressm&0xff);
+				pressure = (pressure << 8)|(pressl&0xff);
+				this.pressure = pressure;
+				this.time = time;
+				this.altitude= Physics.altitude(pressure, temperature);
+			}
+
+			public byte getTemperature() {
+				return temperature;
+			}
+
+			public int getPressure() {
+				return pressure;
+			}
+
+			public double getAltitude() {
+				return altitude;
+			}
+
+			public float getTime() {
+				return time;
+			}
+
+			@Override
+			public String toString() {
+				return new StringBuilder()
+						.append("T=").append(getTemperature()) //$NON-NLS-1$
+						.append(" C; P=").append(getPressure()) //$NON-NLS-1$
+						.append(" Pa") //$NON-NLS-1$
+						.toString();
+			}
+		}
+
 	private static String signatureAsHex(byte[] signature) {
 		StringBuilder sb = new StringBuilder();
 		for(byte c : signature) {
@@ -102,7 +148,7 @@ public class AltimeterFileReader {
 					minAlt = 10000;
 					maxAlt = -10000;
 				} else {
-					AltimeterSample sample = new AltimeterSample(sampleData, time);
+					AltimeterFileSample sample = new AltimeterFileSample(sampleData, time);
 					samples.add(sample);
 					time += tIncr;
 					
@@ -132,6 +178,7 @@ public class AltimeterFileReader {
 		}
 		return new AltimeterFile(f.getName(), result);
 	}
+	
 	
 	
 	public static void main(String[] args) throws Exception {
