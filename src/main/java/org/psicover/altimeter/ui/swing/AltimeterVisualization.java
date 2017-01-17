@@ -267,6 +267,7 @@ public class AltimeterVisualization extends JFrame {
 		exportData.setEnabled(true);
 		exportChart.setEnabled(true);
 
+		pane.removeAll();
 		AltimeterSession[] sessions = altimeterFile.getSessions();
 		for(int i = 0; i < sessions.length; i++) {
 			AltimeterChartPanel panel = new AltimeterChartPanel(sessions[i], i+1);
